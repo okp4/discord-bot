@@ -1,0 +1,33 @@
+branches:
+  - main
+
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - - "@semantic-release/changelog"
+    - changelogFile: CHANGELOG.md
+      changelogTitle: "# ØKP4 template-rust"
+  - - '@google/semantic-release-replace-plugin'
+    - replacements:
+        - files: [ Cargo.toml ]
+          from: ^version = ".+"
+          to: version = "${nextRelease.version}"
+          countMatches: true
+          results:
+            - file: Cargo.toml
+              hasChanged: true
+              numMatches: 1
+              numReplacements: 1
+  - - "@semantic-release/exec"
+    - prepareCmd: |
+        cargo make build
+  - - "@semantic-release/github"
+    - assets:
+        - name: template-rust
+          label: Binary - Darwin amd64
+          path: "./target/release/template-rust"
+  - - "@semantic-release/git"
+    - assets:
+        - CHANGELOG.md
+        - Cargo.toml
+      message: "chore(release): perform release ${nextRelease.version}"

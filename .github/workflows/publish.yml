@@ -1,0 +1,32 @@
+name: Publish
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-crates:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+          override: true
+
+      - name: Install cargo make
+        uses: davidB/rust-cargo-make@v1
+
+      - name: Publish package
+        run: |
+          echo "🚀 Publishing cargo package"
+          cargo make --env CARGO_API_TOKEN="${{ secrets.CARGO_API_TOKEN }}" -- publish
