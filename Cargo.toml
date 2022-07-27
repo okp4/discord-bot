@@ -8,8 +8,6 @@ readme = "README.md"
 repository = "https://github.com/okp4/template-rust"
 version = "0.1.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 abscissa_tokio = { version = "0.6.0-pre.2", features = ["actix"] }
 clap = "3"
@@ -26,9 +24,10 @@ tokio = { version = "1.0", features = ["time", "macros", "tracing"] }
 
 [dependencies.abscissa_core]
 version = "0.6.0"
-# optional: use `gimli` to capture backtraces
-# see https://github.com/rust-lang/backtrace-rs/issues/189
-# features = ["gimli-backtrace"]
+
+[dependencies.tracing]
+version = "0.1.23"
+features = ["log"]
 
 [dev-dependencies]
 abscissa_core = { version = "0.6.0", features = ["testing"] }

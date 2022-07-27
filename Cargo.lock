@@ -341,6 +341,7 @@ dependencies = [
  "serenity",
  "thiserror",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
