@@ -1,10 +1,4 @@
 //! DiscordBot
-//!
-//! Application based on the [Abscissa] framework.
-//!
-//! [Abscissa]: https://github.com/iqlusioninc/abscissa
-
-// Tip: Deny warnings with `RUSTFLAGS="-D warnings"` environment variable in CI
 
 #![forbid(unsafe_code)]
 #![warn(

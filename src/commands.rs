@@ -1,14 +1,4 @@
 //! DiscordBot Subcommands
-//!
-//! This is where you specify the subcommands of your application.
-//!
-//! The default application comes with two subcommands:
-//!
-//! - `start`: launches the application
-//! - `--version`: print application version
-//!
-//! See the `impl Configurable` below for how to specify the path to the
-//! application's configuration file.
 
 mod start;
 
@@ -22,7 +12,6 @@ use std::path::PathBuf;
 pub const CONFIG_FILE: &str = "discord_bot.toml";
 
 /// DiscordBot Subcommands
-/// Subcommands need to be listed in an enum.
 #[derive(Command, Debug, Parser, Runnable)]
 pub enum DiscordBotCmd {
     /// The `start` subcommand
@@ -51,13 +40,10 @@ impl Runnable for EntryPoint {
     }
 }
 
-/// This trait allows you to define how application configuration is loaded.
+/// Define how application configuration is loaded.
 impl Configurable<DiscordBotConfig> for EntryPoint {
     /// Location of the configuration file
     fn config_path(&self) -> Option<PathBuf> {
-        // Check if the config file exists, and if it does not, ignore it.
-        // If you'd like for a missing configuration file to be a hard error
-        // instead, always return `Some(CONFIG_FILE)` here.
         let filename = self
             .config
             .as_ref()
@@ -72,17 +58,9 @@ impl Configurable<DiscordBotConfig> for EntryPoint {
     }
 
     /// Apply changes to the config after it's been loaded, e.g. overriding
-    /// values in a config file using command-line options.
-    ///
-    /// This can be safely deleted if you don't want to override config
-    /// settings from command-line options.
     fn process_config(&self, config: DiscordBotConfig) -> Result<DiscordBotConfig, FrameworkError> {
         match &self.cmd {
             DiscordBotCmd::Start(cmd) => cmd.override_config(config),
-            //
-            // If you don't need special overrides for some
-            // subcommands, you can just use a catch all
-            // _ => Ok(config),
         }
     }
 }

@@ -21,9 +21,6 @@ pub struct DiscordBotApp {
 }
 
 /// Initialize a new application instance.
-///
-/// By default no configuration is loaded, and the framework state is
-/// initialized to a default, empty state (no components, threads, etc).
 impl Default for DiscordBotApp {
     fn default() -> Self {
         Self {
@@ -54,10 +51,6 @@ impl Application for DiscordBotApp {
     }
 
     /// Register all components used by this application.
-    ///
-    /// If you would like to add additional components to your application
-    /// beyond the default ones provided by the framework, this is the place
-    /// to do so.
     fn register_components(&mut self, command: &Self::Cmd) -> Result<(), FrameworkError> {
         let framework_components = self.framework_components(command)?;
         let mut app_components = self.state.components_mut();
@@ -65,10 +58,6 @@ impl Application for DiscordBotApp {
     }
 
     /// Post-configuration lifecycle callback.
-    ///
-    /// Called regardless of whether config is loaded to indicate this is the
-    /// time in app lifecycle when configuration would be loaded if
-    /// possible.
     fn after_config(&mut self, config: Self::Cfg) -> Result<(), FrameworkError> {
         // Configure components
         let mut components = self.state.components_mut();
