@@ -1,23 +1,38 @@
-/// App-local prelude includes `app_reader()`/`app_writer()`/`app_config()`
-/// accessors along with logging macros. Customize as you see fit.
+//! `start` subcommand
 use crate::prelude::*;
 
 use crate::config::DiscordBotConfig;
-use abscissa_core::{config, Command, FrameworkError, Runnable};
-use clap::Parser;
+use crate::discord;
 
-/// `start` subcommand
+use abscissa_core::{config, Command, FrameworkError, Runnable};
+use clap::{Parser};
+use std::process;
+use tracing::{error, info};
 #[derive(Command, Debug, Parser)]
+#[clap(arg_required_else_help(true))]
 pub struct StartCmd {
-    /// To whom are we saying hello?
-    recipient: Vec<String>,
+    /// The discord token
+    #[clap(short = 't')]
+    token: Option<String>,
+
+    /// The guild ID (Server ID)
+    #[clap(short = 'g')]
+    guild_id: Option<u64>,
 }
 
 impl Runnable for StartCmd {
-    /// Start the application.
     fn run(&self) {
         let config = APP.config();
-        println!("Hello, {}!", &config.hello.recipient);
+
+        abscissa_tokio::run(&APP, async {
+            match discord::start(&config.discord.token).await {
+                Err(why) => error!("💥 Client error: {:?}", why),
+                _ => info!("👋 Bye!"),
+            }
+        }).unwrap_or_else(|e| {
+            error!("💥 executor exited with error: {}", e);
+            process::exit(1);
+        });
     }
 }
 
@@ -29,8 +44,12 @@ impl config::Override<DiscordBotConfig> for StartCmd {
         &self,
         mut config: DiscordBotConfig,
     ) -> Result<DiscordBotConfig, FrameworkError> {
-        if !self.recipient.is_empty() {
-            config.hello.recipient = self.recipient.join(" ");
+        if let Some(token) = self.token.clone() {
+            config.discord.token = token;
+        }
+
+        if let Some(guild_id) = self.guild_id {
+            config.discord.guild_id = guild_id
         }
 
         Ok(config)

@@ -14,11 +14,11 @@ pub const CONFIG_FILE: &str = "discord_bot.toml";
 /// DiscordBot Subcommands
 #[derive(Command, Debug, Parser, Runnable)]
 pub enum DiscordBotCmd {
-    /// The `start` subcommand
+    /// Boot the discord bot
     Start(StartCmd),
 }
 
-/// Entry point for the application. It needs to be a struct to allow using subcommands!
+/// OKP4 discord bot application.
 #[derive(Command, Debug, Parser)]
 #[clap(author, about, version)]
 pub struct EntryPoint {

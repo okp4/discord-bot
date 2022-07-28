@@ -1,35 +1,31 @@
 //! DiscordBot Config
 use serde::{Deserialize, Serialize};
 
-/// DiscordBot Configuration
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Default)]
 #[serde(deny_unknown_fields)]
+
+/// Configuration type for the discord bot
 pub struct DiscordBotConfig {
-    /// An example configuration section
-    pub hello: ExampleSection,
+    /// discord section
+    pub discord: DiscordSection,
 }
 
-/// Default configuration settings.
-impl Default for DiscordBotConfig {
-    fn default() -> Self {
-        Self {
-            hello: ExampleSection::default(),
-        }
-    }
-}
-
-/// Example configuration section.
+/// Discord section.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct ExampleSection {
-    /// Example configuration value
-    pub recipient: String,
+pub struct DiscordSection {
+    /// Token
+    pub token: String,
+
+    /// Guild ID (Server ID)
+    pub guild_id: u64,
 }
 
-impl Default for ExampleSection {
+impl Default for DiscordSection {
     fn default() -> Self {
         Self {
-            recipient: "world".to_owned(),
+            token: "".to_owned(),
+            guild_id: 0,
         }
     }
 }

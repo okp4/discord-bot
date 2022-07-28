@@ -6,6 +6,7 @@ use abscissa_core::{
     config::{self, CfgCell},
     trace, Application, FrameworkError, StandardPaths,
 };
+use abscissa_tokio::TokioComponent;
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();
@@ -52,14 +53,17 @@ impl Application for DiscordBotApp {
 
     /// Register all components used by this application.
     fn register_components(&mut self, command: &Self::Cmd) -> Result<(), FrameworkError> {
-        let framework_components = self.framework_components(command)?;
+        let mut framework_components = self.framework_components(command)?;
+
+        framework_components.push(Box::new(TokioComponent::new()?));
+
         let mut app_components = self.state.components_mut();
+
         app_components.register(framework_components)
     }
 
     /// Post-configuration lifecycle callback.
     fn after_config(&mut self, config: Self::Cfg) -> Result<(), FrameworkError> {
-        // Configure components
         let mut components = self.state.components_mut();
         components.after_config(&config)?;
         self.config.set_once(config);
