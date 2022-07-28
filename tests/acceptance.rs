@@ -12,7 +12,6 @@
 )]
 
 use abscissa_core::testing::prelude::*;
-use discord_bot::config::DiscordBotConfig;
 use once_cell::sync::Lazy;
 
 pub static RUNNER: Lazy<CmdRunner> = Lazy::new(|| CmdRunner::default());
