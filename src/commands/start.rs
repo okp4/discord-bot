@@ -25,7 +25,7 @@ impl Runnable for StartCmd {
         let config = APP.config();
 
         abscissa_tokio::run(&APP, async {
-            match discord::start(&config.discord.token).await {
+            match discord::start(&config.discord.token, config.discord.guild_id).await {
                 Err(why) => error!("💥 Client error: {:?}", why),
                 _ => info!("👋 Bye!"),
             }
