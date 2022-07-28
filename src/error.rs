@@ -1,6 +1,7 @@
 //! Error types
 
 use abscissa_core::error::{BoxError, Context};
+use serenity::{Error as SerenityError};
 use std::{
     fmt::{self, Display},
     io,
@@ -8,8 +9,10 @@ use std::{
 };
 use thiserror::Error;
 
+pub use hyper::status::StatusCode;
+
 /// Kinds of errors
-#[derive(Copy, Clone, Debug, Eq, Error, PartialEq)]
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum ErrorKind {
     /// Error in configuration file
     #[error("config error")]
@@ -18,6 +21,14 @@ pub enum ErrorKind {
     /// Input/output error
     #[error("I/O error")]
     Io,
+
+    /// Input/output error
+    #[error("Client error")]
+    Client(String),
+
+    /// Errors from Serenity
+    #[error("Serenity Error {0}")]
+    SerenityError(String),
 }
 
 impl ErrorKind {
@@ -66,5 +77,11 @@ impl From<Context<ErrorKind>> for Error {
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
         ErrorKind::Io.context(err).into()
+    }
+}
+
+impl From<SerenityError> for Error {
+    fn from(err: SerenityError) -> Self {
+        Error::from(ErrorKind::SerenityError(err.to_string()))
     }
 }
