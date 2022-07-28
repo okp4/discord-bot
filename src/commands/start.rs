@@ -5,7 +5,7 @@ use crate::config::DiscordBotConfig;
 use crate::discord;
 
 use abscissa_core::{config, Command, FrameworkError, Runnable};
-use clap::{Parser};
+use clap::Parser;
 use std::process;
 use tracing::{error, info};
 #[derive(Command, Debug, Parser)]
@@ -29,7 +29,8 @@ impl Runnable for StartCmd {
                 Err(why) => error!("💥 Client error: {:?}", why),
                 _ => info!("👋 Bye!"),
             }
-        }).unwrap_or_else(|e| {
+        })
+        .unwrap_or_else(|e| {
             error!("💥 executor exited with error: {}", e);
             process::exit(1);
         });

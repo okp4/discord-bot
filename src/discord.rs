@@ -1,13 +1,13 @@
 //! Discord bot implementations
 use crate::error::{Error, ErrorKind};
-use serenity::model::application::interaction::{ Interaction, InteractionResponseType};
+use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use serenity::{async_trait, model::id::GuildId};
-use strum_macros::Display;
-use tracing::{debug, info, warn};
-use strum_macros::EnumString;
 use std::str::FromStr;
+use strum_macros::Display;
+use strum_macros::EnumString;
+use tracing::{debug, info, warn};
 
 struct Handler {
     guild_id: GuildId,
@@ -45,7 +45,7 @@ impl EventHandler for Handler {
 
             let content = match DiscordCommand::from_str(&command.data.name) {
                 Ok(DiscordCommand::Ping) => "🏓 pong!".to_string(),
-                _ => format!("🤔 I don't understand: {}", command.data.name), 
+                _ => format!("🤔 I don't understand: {}", command.data.name),
             };
 
             if let Err(why) = command

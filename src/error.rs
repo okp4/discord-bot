@@ -1,7 +1,7 @@
 //! Error types
 
 use abscissa_core::error::{BoxError, Context};
-use serenity::{Error as SerenityError};
+use serenity::Error as SerenityError;
 use std::{
     fmt::{self, Display},
     io,
