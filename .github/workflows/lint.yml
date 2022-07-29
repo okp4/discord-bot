@@ -63,15 +63,14 @@ jobs:
           default: true
           override: true
 
-      - name: Install cargo-toml-lint
-        if: steps.changed-rust-cargo.outputs.any_changed == 'true'
-        run: |
-          cargo install --force cargo-toml-lint
+      - name: Install cargo make
+        if: steps.changed-rust-files.outputs.any_changed == 'true'
+        uses: davidB/rust-cargo-make@v1
 
-      - name: Lint toml files
-        if: steps.changed-rust-cargo.outputs.any_changed == 'true'
+      - name: Lint rust code
+        if: steps.changed-rust-files.outputs.any_changed == 'true'
         run: |
-          cargo-toml-lint Cargo.toml
+          cargo make lint-cargo-toml
 
   lint-rust:
     runs-on: ubuntu-20.04
