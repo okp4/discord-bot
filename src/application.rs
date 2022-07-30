@@ -1,12 +1,13 @@
 //! DiscordBot Abscissa Application
 
-use crate::{commands::EntryPoint, config::DiscordBotConfig};
 use abscissa_core::{
     application::{self, AppCell},
     config::{self, CfgCell},
     trace, Application, FrameworkError, StandardPaths,
 };
-use abscissa_tokio::TokioComponent;
+use tracing::info;
+
+use crate::{commands::EntryPoint, config::DiscordBotConfig};
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();
@@ -53,13 +54,17 @@ impl Application for DiscordBotApp {
 
     /// Register all components used by this application.
     fn register_components(&mut self, command: &Self::Cmd) -> Result<(), FrameworkError> {
+        use crate::components::metrics::MetricsEndpoint;
+        use abscissa_tokio::TokioComponent;
+
+        info!("📌 Registering components...");
+
         let mut framework_components = self.framework_components(command)?;
 
         framework_components.push(Box::new(TokioComponent::new()?));
+        framework_components.push(Box::new(MetricsEndpoint::new()?));
 
-        let mut app_components = self.state.components_mut();
-
-        app_components.register(framework_components)
+        self.state.components_mut().register(framework_components)
     }
 
     /// Post-configuration lifecycle callback.
