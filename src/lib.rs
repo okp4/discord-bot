@@ -11,6 +11,7 @@
 
 pub mod application;
 pub mod commands;
+pub mod components;
 pub mod config;
 pub mod discord;
 pub mod error;
