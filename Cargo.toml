@@ -1,11 +1,11 @@
 [package]
 authors = ["OKP4"]
-description = "A template project for Rust."
+description = "Discord bot to bridge the Dataverse!"
 edition = "2021"
 license-file = "LICENSE"
 name = "discord_bot"
 readme = "README.md"
-repository = "https://github.com/okp4/template-rust"
+repository = "https://github.com/okp4/discord-bot"
 version = "0.1.0"
 
 [dependencies]
