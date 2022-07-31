@@ -22,19 +22,15 @@ impl Component<DiscordBotApp> for MetricsEndpoint {
     }
 
     fn after_config(&mut self, config: &DiscordBotConfig) -> Result<(), FrameworkError> {
-        match config.metrics.endpoint {
-            Some(addr) => {
-                metrics_exporter_prometheus::PrometheusBuilder::new()
-                    .with_http_listener(addr)
-                    .install()
-                    .map_err(|e| FrameworkErrorKind::ComponentError.context(e))?;
+        if let Some(addr) = config.metrics.endpoint {
+            metrics_exporter_prometheus::PrometheusBuilder::new()
+                .with_http_listener(addr)
+                .install()
+                .map_err(|e| FrameworkErrorKind::ComponentError.context(e))?;
 
-                info!("👂 Prometheus endpoint: {}", addr);
-
-                Ok(())
-            }
-            None => Ok(()),
+            info!("👂 Prometheus endpoint: {}", addr);
         }
+        Ok(())
     }
 
     fn dependencies(&self) -> Iter<'_, Id> {
