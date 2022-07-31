@@ -23,6 +23,11 @@ enum DiscordCommand {
     Ping,
 }
 
+#[inline(always)]
+fn make_label<'a>(key: &'a str, value: &str) -> (&'a str, String) {
+    (key, value.to_string())
+}
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
@@ -52,23 +57,13 @@ impl EventHandler for Handler {
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        match interaction {
-            Interaction::Ping(_) => {
-                let labels = [("interaction", "ping")];
-                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
-            }
+        let labels = match interaction {
+            Interaction::Ping(_) => [make_label("interaction", "ping")].to_vec(),
             Interaction::MessageComponent(_) => {
-                let labels = [("interaction", "message-component")];
-                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+                [make_label("interaction", "message-component")].to_vec()
             }
-            Interaction::Autocomplete(_) => {
-                let labels = [("interaction", "autocomplete")];
-                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
-            }
-            Interaction::ModalSubmit(_) => {
-                let labels = [("interaction", "modalSubmit")];
-                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
-            }
+            Interaction::Autocomplete(_) => [make_label("interaction", "autocomplete")].to_vec(),
+            Interaction::ModalSubmit(_) => [make_label("interaction", "modal-submit")].to_vec(),
             Interaction::ApplicationCommand(command) => {
                 info!(
                     "➡️ Received command interaction: {} ({}) from {}",
@@ -76,21 +71,25 @@ impl EventHandler for Handler {
                 );
                 debug!("🔬Command is: {:#?}", command);
 
-                let content = match DiscordCommand::from_str(&command.data.name) {
+                let (content, labels) = match DiscordCommand::from_str(&command.data.name) {
                     Ok(DiscordCommand::Ping) => {
                         let labels = [
-                            ("interaction", "application-command".to_string()),
-                            ("command", command.data.name.to_string()),
+                            make_label("interaction", "application-command"),
+                            ("command", command.data.name.clone()),
                         ];
-                        increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
 
-                        "🏓 pong!".to_string()
+                        ("🏓 pong!".to_string(), labels)
                     }
                     _ => {
-                        let labels = [("interaction", "application-command"), ("command", "???")];
-                        increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+                        let labels = [
+                            make_label("interaction", "application-command"),
+                            make_label("command", "???"),
+                        ];
 
-                        format!("🤔 I don't understand: {}", command.data.name)
+                        (
+                            format!("🤔 I don't understand: {}", command.data.name),
+                            labels,
+                        )
                     }
                 };
 
@@ -104,8 +103,12 @@ impl EventHandler for Handler {
                 {
                     warn!("❌ Cannot respond to slash command: {}", why);
                 }
+
+                labels.to_vec()
             }
-        }
+        };
+
+        increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
     }
 }
 
