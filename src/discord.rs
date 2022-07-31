@@ -1,5 +1,6 @@
 //! Discord bot implementations
 use crate::error::{Error, ErrorKind};
+use metrics::{describe_counter, increment_counter};
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
@@ -9,6 +10,8 @@ use std::str::FromStr;
 use strum_macros::Display;
 use strum_macros::EnumString;
 use tracing::{debug, error, info, warn};
+
+static METRIC_DISCORD_INTERACTIONS_TOTAL: &str = "discord_interactions_total";
 
 struct Handler {
     guild_id: GuildId,
@@ -49,35 +52,74 @@ impl EventHandler for Handler {
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::ApplicationCommand(command) = interaction {
-            info!(
-                "➡️ Received command interaction: {} ({}) from {}",
-                command.data.name, command.id, command.user.name
-            );
+        match interaction {
+            Interaction::Ping(_) => {
+                let labels = [("interaction", "ping")];
+                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+            }
+            Interaction::MessageComponent(_) => {
+                let labels = [("interaction", "message-component")];
+                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+            }
+            Interaction::Autocomplete(_) => {
+                let labels = [("interaction", "autocomplete")];
+                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+            }
+            Interaction::ModalSubmit(_) => {
+                let labels = [("interaction", "modalSubmit")];
+                increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+            }
+            Interaction::ApplicationCommand(command) => {
+                info!(
+                    "➡️ Received command interaction: {} ({}) from {}",
+                    command.data.name, command.id, command.user.name
+                );
+                debug!("🔬Command is: {:#?}", command);
 
-            debug!("🔬Command is: {:#?}", command);
+                let content = match DiscordCommand::from_str(&command.data.name) {
+                    Ok(DiscordCommand::Ping) => {
+                        let labels = [
+                            ("interaction", "application-command".to_string()),
+                            ("command", command.data.name.to_string()),
+                        ];
+                        increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
 
-            let content = match DiscordCommand::from_str(&command.data.name) {
-                Ok(DiscordCommand::Ping) => "🏓 pong!".to_string(),
-                _ => format!("🤔 I don't understand: {}", command.data.name),
-            };
+                        "🏓 pong!".to_string()
+                    }
+                    _ => {
+                        let labels = [("interaction", "application-command"), ("command", "???")];
+                        increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
 
-            if let Err(why) = command
-                .create_interaction_response(&ctx.http, |response| {
-                    response
-                        .kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|message| message.content(content))
-                })
-                .await
-            {
-                warn!("❌ Cannot respond to slash command: {}", why);
+                        format!("🤔 I don't understand: {}", command.data.name)
+                    }
+                };
+
+                if let Err(why) = command
+                    .create_interaction_response(&ctx.http, |response| {
+                        response
+                            .kind(InteractionResponseType::ChannelMessageWithSource)
+                            .interaction_response_data(|message| message.content(content))
+                    })
+                    .await
+                {
+                    warn!("❌ Cannot respond to slash command: {}", why);
+                }
             }
         }
     }
 }
 
+fn install_metrics() {
+    describe_counter!(
+        METRIC_DISCORD_INTERACTIONS_TOTAL,
+        "The total number of interactions received by the bot from Discord."
+    );
+}
+
 /// Start the discord bot (given a token)
 pub async fn start(token: &str, guild_id: u64) -> Result<(), Error> {
+    install_metrics();
+
     let intents = GatewayIntents::empty();
 
     info!("🚀 Booting the Bot...");
