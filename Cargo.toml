@@ -13,6 +13,7 @@ abscissa_core = {version = "0.6.0"}
 abscissa_tokio = {version = "0.6.0-pre.2", features = ["actix"]}
 clap = "3"
 hyper = "0.10"
+metrics = { version = "^0.20"}
 metrics-exporter-prometheus = {version = "0.11.0", default-features = false, features = ["http-listener"]}
 serde = {version = "1", features = ["serde_derive"]}
 serenity = {version = "0.11", default-features = false, features = [
