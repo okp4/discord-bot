@@ -9,8 +9,6 @@ use std::{
 };
 use thiserror::Error;
 
-pub use hyper::status::StatusCode;
-
 /// Kinds of errors
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum ErrorKind {
