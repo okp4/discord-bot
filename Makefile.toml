@@ -33,6 +33,12 @@ command = "taplo"
 description = "Check lint of all toml files."
 install_crate = { crate_name = "taplo-cli", binary = "taplo", test_arg = "--help" }
 
+[tasks.lint-cargo-toml]
+args = ["Cargo.toml"]
+command = "cargo-toml-lint"
+description = "Check lint of cargo toml files."
+install_crate = { crate_name = "cargo-toml-lint", binary = "cargo-toml-lint", test_arg = "--help" }
+
 [tasks.format-toml]
 args = ["fmt"]
 command = "taplo"
@@ -40,7 +46,7 @@ description = "Format toml file"
 install_crate = { crate_name = "taplo-cli", binary = "taplo", test_arg = "--help" }
 
 [tasks.lint]
-dependencies = ["lint-rust-format", "lint-rust", "lint-toml"]
+dependencies = ["lint-rust-format", "lint-rust", "lint-toml", "lint-cargo-toml"]
 
 [tasks.format]
 dependencies = ["format-rust", "format-toml"]
