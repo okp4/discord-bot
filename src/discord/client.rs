@@ -77,7 +77,7 @@ impl EventHandler for Handler {
                         discord_command
                             .as_ref()
                             .map(|name| name.to_string())
-                            .unwrap_or("???".to_string()),
+                            .unwrap_or_else(|_| "???".to_string()),
                     ),
                 ];
 
