@@ -3,6 +3,7 @@ use crate::discord::cmd_ping;
 use crate::discord::error::Error as DiscordError;
 use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::metrics::{
+    LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
     METRIC_DISCORD_INTERACTIONS_DURATION, METRIC_DISCORD_INTERACTIONS_TOTAL,
 };
 use crate::discord::utils::interation_name;
@@ -60,7 +61,7 @@ impl EventHandler for Handler {
             | Interaction::MessageComponent(_)
             | Interaction::Autocomplete(_)
             | Interaction::ModalSubmit(_) => {
-                vec![("interaction", interation_name(&interaction))]
+                vec![(LABEL_NAME_INTERACTION, interation_name(&interaction))]
             }
             Interaction::ApplicationCommand(ref command) => {
                 info!(
@@ -71,13 +72,13 @@ impl EventHandler for Handler {
 
                 let discord_command = DiscordCommand::from_str(&command.data.name);
                 let labels = vec![
-                    ("interaction", interation_name(&interaction)),
+                    (LABEL_NAME_INTERACTION, interation_name(&interaction)),
                     (
-                        "command",
+                        LABEL_NAME_COMMAND,
                         discord_command
                             .as_ref()
                             .map(|name| name.to_string())
-                            .unwrap_or_else(|_| "???".to_string()),
+                            .unwrap_or_else(|_| LABEL_VALUE_COMMAND_UNKNOWN.to_string()),
                     ),
                 ];
 
