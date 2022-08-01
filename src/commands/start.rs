@@ -7,7 +7,7 @@ use clap::Parser;
 use tracing::{error, info};
 
 use crate::config::DiscordBotConfig;
-use crate::discord;
+use crate::discord::client;
 use crate::prelude::*;
 
 #[derive(Command, Debug, Parser)]
@@ -34,7 +34,7 @@ impl Runnable for StartCmd {
         let config = APP.config();
 
         abscissa_tokio::run(&APP, async {
-            match discord::start(&config.discord.token, config.discord.guild_id).await {
+            match client::start(&config.discord.token, config.discord.guild_id).await {
                 Err(why) => error!("💀 Client error: {:?}", why),
                 _ => info!("👋 Bye!"),
             }
