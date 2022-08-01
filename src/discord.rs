@@ -1,17 +1,19 @@
 //! Discord bot implementations
 use crate::error::{Error, ErrorKind};
-use metrics::{describe_counter, increment_counter};
+use metrics::{describe_counter, describe_histogram, histogram, increment_counter, Unit};
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use serenity::{async_trait, model::id::GuildId};
 use std::process::exit;
 use std::str::FromStr;
+use std::time::Instant;
 use strum_macros::Display;
 use strum_macros::EnumString;
 use tracing::{debug, error, info, warn};
 
 static METRIC_DISCORD_INTERACTIONS_TOTAL: &str = "discord_interactions_total";
+static METRIC_DISCORD_INTERACTIONS_DURATION: &str = "discord_interactions_duration";
 
 struct Handler {
     guild_id: GuildId,
@@ -57,6 +59,7 @@ impl EventHandler for Handler {
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        let start = Instant::now();
         let labels = match interaction {
             Interaction::Ping(_) => [make_label("interaction", "ping")].to_vec(),
             Interaction::MessageComponent(_) => {
@@ -107,21 +110,28 @@ impl EventHandler for Handler {
                 labels.to_vec()
             }
         };
+        let delta = start.elapsed();
 
         increment_counter!(METRIC_DISCORD_INTERACTIONS_TOTAL, &labels);
+        histogram!(METRIC_DISCORD_INTERACTIONS_DURATION, delta, &labels);
     }
 }
 
-fn install_metrics() {
+fn register_metrics() {
     describe_counter!(
         METRIC_DISCORD_INTERACTIONS_TOTAL,
-        "The total number of interactions received by the bot from Discord."
+        "The total number of interactions received by the bot from Discord, labeled with: interaction, command."
+    );
+    describe_histogram!(
+        METRIC_DISCORD_INTERACTIONS_DURATION,
+        Unit::Seconds,
+        "Timing statistics (percentiles) for Discord interaction processing durations, labeled with: interaction, command, quantile."
     );
 }
 
 /// Start the discord bot (given a token)
 pub async fn start(token: &str, guild_id: u64) -> Result<(), Error> {
-    install_metrics();
+    register_metrics();
 
     let intents = GatewayIntents::empty();
 
