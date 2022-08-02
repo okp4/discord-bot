@@ -1,5 +1,5 @@
 //! Discord bot implementations
-use crate::discord::cmd_ping;
+use crate::discord::cmd::ping::PingCmd;
 use crate::discord::error::Error as DiscordError;
 use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::metrics::{
@@ -18,7 +18,7 @@ use std::process::exit;
 use std::str::FromStr;
 use std::time::Instant;
 
-use crate::discord::cmd::DiscordCommand;
+use crate::discord::cmd::{CommandExecutable, DiscordCommand};
 use tracing::{debug, error, info, warn};
 
 struct Handler {
@@ -83,7 +83,7 @@ impl EventHandler for Handler {
                 ];
 
                 let execution_result = match discord_command {
-                    Ok(DiscordCommand::Ping) => cmd_ping::execute(&ctx, &interaction, command),
+                    Ok(DiscordCommand::Ping) => PingCmd::execute(&ctx, &interaction, command).await,
                     _ => Err(DiscordError::from(UnknownCommand(format!(
                         "🤔 I don't understand: {}",
                         command.data.name
@@ -91,10 +91,8 @@ impl EventHandler for Handler {
                 };
 
                 match execution_result {
-                    Ok(content) => {
-                        if let Err(why) = Self::send_response(&ctx, command, content).await {
-                            warn!("❌ Cannot respond to slash command: {}", why);
-                        }
+                    Ok(_) => {
+                        info!("✅ Successful execute slash command");
                     }
                     Err(err) => {
                         warn!("❌ Failed to execute command: {}", err);
