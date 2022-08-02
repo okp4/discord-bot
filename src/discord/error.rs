@@ -1,6 +1,7 @@
 //! Error types
 
 use abscissa_core::error::{BoxError, Context};
+use serenity::Error as SerenityError;
 use std::{
     fmt::{self, Display},
     ops::Deref,
@@ -13,6 +14,10 @@ pub enum ErrorKind {
     /// Unknown command execution error
     #[error("Unknown error")]
     UnknownCommand(String),
+
+    /// Errors from Serenity
+    #[error("Serenity Error {0}")]
+    Serenity(String),
 }
 
 impl ErrorKind {
@@ -55,5 +60,11 @@ impl From<ErrorKind> for Error {
 impl From<Context<ErrorKind>> for Error {
     fn from(context: Context<ErrorKind>) -> Self {
         Error(Box::new(context))
+    }
+}
+
+impl From<SerenityError> for Error {
+    fn from(err: SerenityError) -> Self {
+        ErrorKind::Serenity(err.to_string()).context(err).into()
     }
 }
