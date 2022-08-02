@@ -49,6 +49,7 @@ impl MetricsEndpoint {
 
     #[cfg(target_os = "linux")]
     fn install_metrics(&self, duration: Duration) {
+        use tokio::{task, time};
         use tracing::warn;
 
         metrics_process_promstyle::describe();
@@ -57,12 +58,14 @@ impl MetricsEndpoint {
             "⚙️ Start metrics process (duration: {} ms)",
             duration.as_millis()
         );
-        std::thread::spawn(move || {
-            std::thread::sleep(duration);
+        task::spawn(async move {
+            let mut interval = time::interval(duration);
 
-            // #[cfg(target_os = "linux")]
-            if let Err(why) = metrics_process_promstyle::emit_now() {
-                warn!("❌ Failed to emit process metrics: {}", why);
+            loop {
+                interval.tick().await;
+                if let Err(why) = metrics_process_promstyle::emit_now() {
+                    warn!("❌ Failed to emit process metrics: {}", why);
+                }
             }
         });
     }
