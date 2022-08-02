@@ -1,8 +1,8 @@
 //! Discord bot implementations
 use crate::discord::cmd::ping::PingCmd;
 use crate::discord::error::Error as DiscordError;
-use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::error::ErrorKind::MissingArg;
+use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::metrics::{
     LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
     METRIC_DISCORD_INTERACTIONS_DURATION, METRIC_DISCORD_INTERACTIONS_TOTAL,
@@ -10,6 +10,7 @@ use crate::discord::metrics::{
 use crate::discord::utils::interation_name;
 use crate::error::{Error, ErrorKind};
 use metrics::{describe_counter, describe_histogram, histogram, increment_counter, Unit};
+use serenity::model::application::command::CommandOptionType;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use serenity::model::gateway::Ready;
@@ -19,9 +20,9 @@ use std::process::exit;
 use std::str::FromStr;
 use std::time::Instant;
 
+use crate::discord::cmd::request::RequestCmd;
 use crate::discord::cmd::{CommandExecutable, DiscordCommand};
 use tracing::{debug, error, info, warn};
-use crate::discord::cmd::request::RequestCmd;
 
 struct Handler {
     guild_id: GuildId,
@@ -33,11 +34,24 @@ impl EventHandler for Handler {
         info!("🤝 {} is connected!", ready.user.name);
 
         let commands = GuildId::set_application_commands(&self.guild_id, &ctx.http, |commands| {
-            commands.create_application_command(|command| {
-                command
-                    .name(DiscordCommand::Ping)
-                    .description("A ping command 🏓 (for testing purposes)")
-            })
+            commands
+                .create_application_command(|command| {
+                    command
+                        .name(DiscordCommand::Ping)
+                        .description("A ping command 🏓 (for testing purposes)")
+                })
+                .create_application_command(|command| {
+                    command
+                        .name(DiscordCommand::Request)
+                        .description("Request 1know from testnet 💵")
+                        .create_option(|option| {
+                            option
+                                .name("address")
+                                .description("OKP4 address you want to receive know")
+                                .kind(CommandOptionType::String)
+                                .required(true)
+                        })
+                })
         })
         .await;
 
@@ -96,12 +110,12 @@ impl EventHandler for Handler {
                             .and_then(|v| v.value.as_ref())
                             .ok_or_else(|| DiscordError::from(MissingArg("address".to_string())))
                             .map(|v| v.to_string())
-                            .map(|address| RequestCmd { address }) {
-
+                            .map(|address| RequestCmd { address })
+                        {
                             Ok(cmd) => cmd.execute(&ctx, &interaction, &command).await,
                             Err(why) => Err(why),
                         }
-                    },
+                    }
                     _ => Err(DiscordError::from(UnknownCommand(format!(
                         "🤔 I don't understand: {}",
                         command.data.name

@@ -18,7 +18,7 @@ pub enum ErrorKind {
     /// Missing arg for command
     #[error("Missing {0} arg")]
     MissingArg(String),
-    
+
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
     Serenity(String),
