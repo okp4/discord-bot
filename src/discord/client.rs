@@ -1,6 +1,7 @@
 //! Discord bot implementations
 use crate::discord::cmd::ping::PingCmd;
 use crate::discord::error::Error as DiscordError;
+use crate::discord::error::ErrorKind::IncorrectArg;
 use crate::discord::error::ErrorKind::MissingArg;
 use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::metrics::{
@@ -109,9 +110,19 @@ impl EventHandler for Handler {
                             .first()
                             .and_then(|v| v.value.as_ref())
                             .ok_or_else(|| DiscordError::from(MissingArg("address".to_string())))
+                            .and_then(|v| {
+                                v.as_str().ok_or_else(|| {
+                                    DiscordError::from(IncorrectArg(
+                                        "address".to_string(),
+                                        "Should be a string".to_string(),
+                                    ))
+                                })
+                            })
                             .map(|v| v.to_string())
-                            .map(|address| RequestCmd { address })
-                        {
+                            .map(|address| {
+                                info!("Request command to address : {}", address);
+                                RequestCmd { address }
+                            }) {
                             Ok(cmd) => cmd.execute(&ctx, &interaction, &command).await,
                             Err(why) => Err(why),
                         }

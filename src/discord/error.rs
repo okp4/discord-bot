@@ -19,6 +19,10 @@ pub enum ErrorKind {
     #[error("Missing {0} arg")]
     MissingArg(String),
 
+    /// Arg is incorrect
+    #[error("{0} arg is incorrect {1}")]
+    IncorrectArg(String, String),
+
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
     Serenity(String),
