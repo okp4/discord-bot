@@ -82,8 +82,10 @@ impl EventHandler for Handler {
                     ),
                 ];
 
-                let execution_result = match discord_command {
-                    Ok(DiscordCommand::Ping) => PingCmd::execute(&ctx, &interaction, command).await,
+                let execution_result: Result<(), DiscordError> = match discord_command {
+                    Ok(DiscordCommand::Ping) => {
+                        PingCmd {}.execute(&ctx, &interaction, command).await
+                    }
                     _ => Err(DiscordError::from(UnknownCommand(format!(
                         "🤔 I don't understand: {}",
                         command.data.name

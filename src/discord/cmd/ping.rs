@@ -11,6 +11,7 @@ pub struct PingCmd {}
 #[async_trait]
 impl CommandExecutable for PingCmd {
     async fn execute(
+        &self,
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,

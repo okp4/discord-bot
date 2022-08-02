@@ -15,6 +15,7 @@ use strum_macros::EnumString;
 pub trait CommandExecutable {
     /// Execute command
     async fn execute(
+        &self,
         _: &Context,
         _: &Interaction,
         _: &ApplicationCommandInteraction,
