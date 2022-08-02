@@ -2,6 +2,7 @@
 use crate::discord::cmd::ping::PingCmd;
 use crate::discord::error::Error as DiscordError;
 use crate::discord::error::ErrorKind::UnknownCommand;
+use crate::discord::error::ErrorKind::MissingArg;
 use crate::discord::metrics::{
     LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
     METRIC_DISCORD_INTERACTIONS_DURATION, METRIC_DISCORD_INTERACTIONS_TOTAL,
@@ -20,6 +21,7 @@ use std::time::Instant;
 
 use crate::discord::cmd::{CommandExecutable, DiscordCommand};
 use tracing::{debug, error, info, warn};
+use crate::discord::cmd::request::RequestCmd;
 
 struct Handler {
     guild_id: GuildId,
@@ -86,6 +88,20 @@ impl EventHandler for Handler {
                     Ok(DiscordCommand::Ping) => {
                         PingCmd {}.execute(&ctx, &interaction, command).await
                     }
+                    Ok(DiscordCommand::Request) => {
+                        match command
+                            .data
+                            .options
+                            .first()
+                            .and_then(|v| v.value.as_ref())
+                            .ok_or_else(|| DiscordError::from(MissingArg("address".to_string())))
+                            .map(|v| v.to_string())
+                            .map(|address| RequestCmd { address }) {
+
+                            Ok(cmd) => cmd.execute(&ctx, &interaction, &command).await,
+                            Err(why) => Err(why),
+                        }
+                    },
                     _ => Err(DiscordError::from(UnknownCommand(format!(
                         "🤔 I don't understand: {}",
                         command.data.name

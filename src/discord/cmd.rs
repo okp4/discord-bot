@@ -1,6 +1,7 @@
 //! Holds some types for discord slash commands.
 
 pub(crate) mod ping;
+pub(crate) mod request;
 
 use crate::discord::error::Error;
 use serenity::async_trait;
@@ -27,4 +28,7 @@ pub enum DiscordCommand {
     /// The ping command.
     #[strum(serialize = "ping")]
     Ping,
+    /// The request command.
+    #[strum(serialize = "request")]
+    Request,
 }
