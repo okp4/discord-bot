@@ -65,8 +65,8 @@ impl Default for MetricsSection {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ChainSection {
-    /// The grpc okp4 server url.
-    pub grpc_address: String,
+    /// The chain okp4 server url.
+    pub grpc_address: SocketAddr,
 
     /// The network chain ID.
     pub chain_id: String,
@@ -81,7 +81,7 @@ pub struct ChainSection {
 impl Default for ChainSection {
     fn default() -> Self {
         Self {
-            grpc_address: "http://[::1]:9090".to_string(),
+            grpc_address: "0.0.0.0:9090".to_string().parse().unwrap(),
             chain_id: "localnet-okp4-1".to_string(),
             denom: "know".to_string(),
             prefix: "okp4".to_string(),
