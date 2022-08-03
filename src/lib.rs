@@ -14,6 +14,7 @@
 )]
 
 pub mod application;
+pub mod chain;
 pub mod commands;
 pub mod components;
 pub mod config;

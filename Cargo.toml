@@ -11,7 +11,10 @@ version = "0.1.0"
 [dependencies]
 abscissa_core = { version = "0.6.0" }
 abscissa_tokio = { version = "0.6.0-pre.2", features = ["actix"] }
+bip39 = "1"
 clap = "3"
+cosmos-sdk-proto = "0.13.0"
+cosmrs = { git = "https://github.com/okp4/cosmos-rust", branch = "fix/addr-prefix-check" }
 hyper = "0.14.20"
 metrics = { version = "^0.20" }
 metrics-exporter-prometheus = { version = "0.11.0", default-features = false, features = [

@@ -6,6 +6,7 @@ use std::{
     fmt::{self, Display},
     ops::Deref,
 };
+use crate::chain::error::Error as ChainError;
 use thiserror::Error;
 
 /// Kinds of errors
@@ -26,6 +27,10 @@ pub enum ErrorKind {
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
     Serenity(String),
+
+    /// Errors from the grpc client
+    #[error("GRPC client error : {0}")]
+    Chain(ChainError),
 }
 
 impl ErrorKind {
@@ -74,5 +79,11 @@ impl From<Context<ErrorKind>> for Error {
 impl From<SerenityError> for Error {
     fn from(err: SerenityError) -> Self {
         ErrorKind::Serenity(err.to_string()).context(err).into()
+    }
+}
+
+impl From<ChainError> for Error {
+    fn from(err: ChainError) -> Self {
+        Error::from(ErrorKind::Chain(err))
     }
 }

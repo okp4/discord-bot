@@ -1,9 +1,12 @@
+use abscissa_core::Application;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
+use crate::application::APP;
+use crate::chain::faucet::FaucetClient;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
@@ -20,6 +23,11 @@ impl CommandExecutable for RequestCmd {
         _: &Interaction,
         command: &ApplicationCommandInteraction,
     ) -> Result<(), Error> {
+
+        let config = &APP.config();
+
+        let _ =FaucetClient::new(&config.faucet.mnemonic)?;
+
         command
             .create_interaction_response(&ctx.http, |response| {
                 response
