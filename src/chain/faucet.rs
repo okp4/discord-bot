@@ -17,7 +17,7 @@ pub struct FaucetClient {
     pub signing_key: secp256k1::SigningKey,
 }
 
-unsafe impl Send for FaucetClient { }
+unsafe impl Send for FaucetClient {}
 
 impl FaucetClient {
     /// Create a new faucet client based on the sender mnemonic account.

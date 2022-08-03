@@ -7,12 +7,12 @@ use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{BaseAccount, QueryAccountRequest};
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastTxRequest;
-use cosmrs::proto::prost;
-use cosmrs::{AccountId, Coin, tx};
 use cosmrs::bank::MsgSend;
-use cosmrs::Error as CosmosError;
+use cosmrs::proto::prost;
 use cosmrs::tendermint::chain::Id;
 use cosmrs::tx::{Fee, Msg, SignDoc, SignerInfo};
+use cosmrs::Error as CosmosError;
+use cosmrs::{tx, AccountId, Coin};
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
@@ -33,7 +33,6 @@ impl CommandExecutable for RequestCmd {
         _: &Interaction,
         command: &ApplicationCommandInteraction,
     ) -> Result<(), Error> {
-
         let config = &APP.config();
 
         let faucet = FaucetClient::new(&config.faucet.mnemonic)?;
@@ -42,7 +41,7 @@ impl CommandExecutable for RequestCmd {
 
         let amount = Coin {
             amount: config.faucet.amount_send as u128,
-            denom: "uknow".parse().unwrap(),
+            denom: config.chain.denom.parse().unwrap(),
         };
 
         let msg_send = MsgSend {
@@ -60,7 +59,8 @@ impl CommandExecutable for RequestCmd {
 
         let tx_body = tx::Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
 
-        let signer_info = SignerInfo::single_direct(Some(faucet.signing_key.public_key()), sequence_number);
+        let signer_info =
+            SignerInfo::single_direct(Some(faucet.signing_key.public_key()), sequence_number);
 
         let auth_info = signer_info.auth_info(Fee::from_amount_and_gas(amount, gas));
 
@@ -70,22 +70,32 @@ impl CommandExecutable for RequestCmd {
 
         let tx_bytes = tx_signed.to_bytes().unwrap();
 
-        let mut client = ServiceClient::connect(config.chain.grpc_address.to_string()).await.unwrap();
+        let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
+            .await
+            .unwrap();
 
-        let request = tonic::Request::new(BroadcastTxRequest {
-            tx_bytes,
-            mode: 2
-        });
+        let request = tonic::Request::new(BroadcastTxRequest { tx_bytes, mode: 2 });
 
         let tx_response = client.broadcast_tx(request).await.unwrap();
 
+        let content = format!(
+            "💵 You will receive {}{}.
+            \t- 🤝 Transaction hash: {}
+            \t- ⚙️ Result code : {}
+            \t- 📝 Raw log : {}
+            \t- ⛽️ Gas used: {}",
+            config.faucet.amount_send,
+            config.chain.denom,
+            tx_response.get_ref().tx_response.as_ref().unwrap().txhash,
+            tx_response.get_ref().tx_response.as_ref().unwrap().code,
+            tx_response.get_ref().tx_response.as_ref().unwrap().raw_log,
+            tx_response.get_ref().tx_response.as_ref().unwrap().gas_used
+        );
         command
             .create_interaction_response(&ctx.http, |response| {
                 response
                     .kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|message| {
-                        message.content(format!("Request token for {} from {}. Hash : {}", self.address, account.account_number, tx_response.get_ref().tx_response.as_ref().unwrap().txhash))
-                    })
+                    .interaction_response_data(|message| message.content(content))
             })
             .await
             .map_err(Error::from)

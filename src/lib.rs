@@ -1,6 +1,5 @@
 //! DiscordBot
 
-
 #![deny(
     warnings,
     missing_docs,

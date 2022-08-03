@@ -2,8 +2,8 @@
 
 use crate::chain::error::Error as ChainError;
 use abscissa_core::error::{BoxError, Context};
-use serenity::Error as SerenityError;
 use cosmrs::Error as CosmosError;
+use serenity::Error as SerenityError;
 use std::{
     fmt::{self, Display},
     ops::Deref,
