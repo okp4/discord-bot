@@ -14,18 +14,18 @@ use crate::prelude::*;
 #[clap(arg_required_else_help(true))]
 pub struct StartCmd {
     /// The discord token
-    #[clap(short = 't')]
+    #[clap(short = 't', long = "token")]
     token: Option<String>,
 
     /// The guild ID (Server ID)
-    #[clap(short = 'g')]
+    #[clap(short = 'g', long = "guild-id")]
     guild_id: Option<u64>,
 
     /// The prometheus endpoint.
     /// Optional. Configures an HTTP exporter that functions as a scrape endpoint for prometheus.
     /// The value is an IPv4 or IPv6 address and a port number, separated by a colon. For instance:
     /// 0.0.0.0:9000
-    #[clap(short = 'p')]
+    #[clap(short = 'p', long = "prometheus-endpoint")]
     prometheus_endpoint: Option<SocketAddr>,
 }
 
