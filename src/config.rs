@@ -1,13 +1,18 @@
 //! DiscordBot Config
+use std::net::SocketAddr;
+use std::time::Duration;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
 #[serde(deny_unknown_fields)]
-
 /// Configuration type for the discord bot
 pub struct DiscordBotConfig {
     /// discord section
     pub discord: DiscordSection,
+
+    /// Metrics configuration
+    pub metrics: MetricsSection,
 }
 
 /// Discord section.
@@ -26,6 +31,26 @@ impl Default for DiscordSection {
         Self {
             token: "".to_owned(),
             guild_id: 0,
+        }
+    }
+}
+
+/// Metrics configuration section.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct MetricsSection {
+    /// The address used for the Prometheus metrics endpoint.
+    pub endpoint: Option<SocketAddr>,
+
+    /// The refresh duration for system metrics (process).
+    pub refresh: Duration,
+}
+
+impl Default for MetricsSection {
+    fn default() -> Self {
+        Self {
+            endpoint: None,
+            refresh: Duration::from_secs(1),
         }
     }
 }

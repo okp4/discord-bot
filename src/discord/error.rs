@@ -4,7 +4,6 @@ use abscissa_core::error::{BoxError, Context};
 use serenity::Error as SerenityError;
 use std::{
     fmt::{self, Display},
-    io,
     ops::Deref,
 };
 use thiserror::Error;
@@ -12,21 +11,13 @@ use thiserror::Error;
 /// Kinds of errors
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum ErrorKind {
-    /// Error in configuration file
-    #[error("config error")]
-    Config,
-
-    /// Input/output error
-    #[error("I/O error")]
-    Io,
-
-    /// Input/output error
-    #[error("Client error")]
-    Client(String),
+    /// Unknown command execution error
+    #[error("Unknown error")]
+    UnknownCommand(String),
 
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
-    SerenityError(String),
+    Serenity(String),
 }
 
 impl ErrorKind {
@@ -72,16 +63,8 @@ impl From<Context<ErrorKind>> for Error {
     }
 }
 
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        ErrorKind::Io.context(err).into()
-    }
-}
-
 impl From<SerenityError> for Error {
     fn from(err: SerenityError) -> Self {
-        ErrorKind::SerenityError(err.to_string())
-            .context(err)
-            .into()
+        ErrorKind::Serenity(err.to_string()).context(err).into()
     }
 }

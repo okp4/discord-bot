@@ -1,23 +1,32 @@
 //! `start` subcommand
-use crate::prelude::*;
-
-use crate::config::DiscordBotConfig;
-use crate::discord;
+use std::net::SocketAddr;
+use std::process;
 
 use abscissa_core::{config, Command, FrameworkError, Runnable};
 use clap::Parser;
-use std::process;
 use tracing::{error, info};
+
+use crate::config::DiscordBotConfig;
+use crate::discord::client;
+use crate::prelude::*;
+
 #[derive(Command, Debug, Parser)]
 #[clap(arg_required_else_help(true))]
 pub struct StartCmd {
     /// The discord token
-    #[clap(short = 't')]
+    #[clap(short = 't', long = "token")]
     token: Option<String>,
 
     /// The guild ID (Server ID)
-    #[clap(short = 'g')]
+    #[clap(short = 'g', long = "guild-id")]
     guild_id: Option<u64>,
+
+    /// The prometheus endpoint.
+    /// Optional. Configures an HTTP exporter that functions as a scrape endpoint for prometheus.
+    /// The value is an IPv4 or IPv6 address and a port number, separated by a colon. For instance:
+    /// 0.0.0.0:9000
+    #[clap(short = 'p', long = "prometheus-endpoint")]
+    prometheus_endpoint: Option<SocketAddr>,
 }
 
 impl Runnable for StartCmd {
@@ -25,13 +34,13 @@ impl Runnable for StartCmd {
         let config = APP.config();
 
         abscissa_tokio::run(&APP, async {
-            match discord::start(&config.discord.token, config.discord.guild_id).await {
-                Err(why) => error!("💥 Client error: {:?}", why),
+            match client::start(&config.discord.token, config.discord.guild_id).await {
+                Err(why) => error!("💀 Client error: {:?}", why),
                 _ => info!("👋 Bye!"),
             }
         })
         .unwrap_or_else(|e| {
-            error!("💥 executor exited with error: {}", e);
+            error!("💀 executor exited with error: {}", e);
             process::exit(1);
         });
     }
@@ -51,6 +60,10 @@ impl config::Override<DiscordBotConfig> for StartCmd {
 
         if let Some(guild_id) = self.guild_id {
             config.discord.guild_id = guild_id
+        }
+
+        if self.prometheus_endpoint.is_some() {
+            config.metrics.endpoint = self.prometheus_endpoint
         }
 
         Ok(config)
