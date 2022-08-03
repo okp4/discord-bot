@@ -17,8 +17,9 @@ pub struct FaucetClient {
     pub signing_key: secp256k1::SigningKey,
 }
 
-impl FaucetClient {
+unsafe impl Send for FaucetClient { }
 
+impl FaucetClient {
     /// Create a new faucet client based on the sender mnemonic account.
     pub fn new(mnemonic: &String) -> Result<Self, Error> {
         let mnemonic = Mnemonic::parse(mnemonic)?;

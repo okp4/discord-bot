@@ -1,6 +1,6 @@
 //! DiscordBot
 
-#![forbid(unsafe_code)]
+
 #![deny(
     warnings,
     missing_docs,

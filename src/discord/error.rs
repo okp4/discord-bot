@@ -1,12 +1,13 @@
 //! Error types
 
+use crate::chain::error::Error as ChainError;
 use abscissa_core::error::{BoxError, Context};
 use serenity::Error as SerenityError;
+use cosmrs::Error as CosmosError;
 use std::{
     fmt::{self, Display},
     ops::Deref,
 };
-use crate::chain::error::Error as ChainError;
 use thiserror::Error;
 
 /// Kinds of errors
@@ -85,5 +86,11 @@ impl From<SerenityError> for Error {
 impl From<ChainError> for Error {
     fn from(err: ChainError) -> Self {
         Error::from(ErrorKind::Chain(err))
+    }
+}
+
+impl From<CosmosError> for Error {
+    fn from(err: CosmosError) -> Self {
+        Error::from(ChainError::from(err))
     }
 }
