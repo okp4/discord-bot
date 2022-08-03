@@ -37,13 +37,19 @@ USAGE:
     discord_bot start [OPTIONS]
 
 OPTIONS:
-    -g <GUILD_ID>                   The guild ID (Server ID)
-    -h, --help                      Print help information
-    -p <PROMETHEUS_ENDPOINT>        The prometheus endpoint. Optional. Configures an HTTP exporter
-                                    that functions as a scrape endpoint for prometheus. The value is
-                                    an IPv4 or IPv6 address and a port number, separated by a colon.
-                                    For instance: 0.0.0.0:9000
-    -t <TOKEN>                      The discord token
+    -g, --guild-id <GUILD_ID>
+            The guild ID (Server ID)
+
+    -h, --help
+            Print help information
+
+    -p, --prometheus-endpoint <PROMETHEUS_ENDPOINT>
+            The prometheus endpoint. Optional. Configures an HTTP exporter that functions as a
+            scrape endpoint for prometheus. The value is an IPv4 or IPv6 address and a port number,
+            separated by a colon. For instance: 0.0.0.0:9000
+
+    -t, --token <TOKEN>
+            The discord token
 ```
 
 #### Example
