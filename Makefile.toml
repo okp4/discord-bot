@@ -83,3 +83,8 @@ grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existin
 [tasks.publish]
 args = ["publish", "--token", "${CARGO_API_TOKEN}"]
 command = "cargo"
+
+[tasks.docker]
+args = ["build", "-t", "discord-bot", "."]
+command = "docker"
+description = "Build Docker"
