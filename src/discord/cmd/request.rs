@@ -34,6 +34,7 @@ impl CommandExecutable for RequestCmd {
         command: &ApplicationCommandInteraction,
     ) -> Result<(), Error> {
         let config = &APP.config();
+        let mut client = &APP.client().await;
 
         let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)?;
 
@@ -54,7 +55,7 @@ impl CommandExecutable for RequestCmd {
 
         let tx_body = Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
 
-        let tx_signed = sign_tx(&APP.client.as_ref().unwrap(), &tx_body, sender, Fee::from_amount_and_gas(amount, gas)).await?;
+        let tx_signed = sign_tx(&client.clone(), &tx_body, sender, Fee::from_amount_and_gas(amount, gas)).await?;
 
         // // /**/let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
         //     .await
@@ -65,7 +66,7 @@ impl CommandExecutable for RequestCmd {
             mode: 2,
         });
 
-        let tx_response = &APP.client.as_ref().unwrap().clone().tx().broadcast_tx(request).await.unwrap();
+        let tx_response = client.clone().tx().broadcast_tx(request).await.unwrap();
 
         let content = format!(
             "💵 You will receive {}{}.

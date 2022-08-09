@@ -11,7 +11,6 @@ use tracing::info;
 
 use crate::{commands::EntryPoint, config::DiscordBotConfig};
 use crate::chain::client::Client;
-use crate::chain::error::Error;
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();
@@ -26,7 +25,7 @@ pub struct DiscordBotApp {
     state: application::State<Self>,
 
     /// GRPC client connection.
-    pub client: Result<Client<Channel>, Error>,
+    client: Option<Box<Client<Channel>>>,
 }
 
 /// Initialize a new application instance.
@@ -35,7 +34,7 @@ impl Default for DiscordBotApp {
         Self {
             config: CfgCell::default(),
             state: application::State::default(),
-            client: Err(Error::NotInitialized),
+            client: None,
         }
     }
 }
@@ -79,15 +78,9 @@ impl Application for DiscordBotApp {
     fn after_config(&mut self, config: Self::Cfg) -> Result<(), FrameworkError> {
         let mut components = self.state.components_mut();
         components.after_config(&config)?;
+        self.config.set_once(config);
 
-        block(async  {
-            self.client = Client::new(config.chain.grpc_address.to_string()).await;
-
-
-            self.config.set_once(config);
-
-            Ok(())
-        })
+        Ok(())
     }
 
     /// Get tracing configuration from command-line options
@@ -100,6 +93,18 @@ impl Application for DiscordBotApp {
     }
 }
 
+impl DiscordBotApp {
+    pub async fn client(&mut self) -> Client<Channel>  {
+        match &self.client {
+            Some(c) => *c.clone(),
+            None => {
+                let new_client = Client::new(self.config().chain.grpc_address.to_string()).await.unwrap();
+                self.client = Some(Box::new(new_client));
+                *self.client.clone().unwrap()
+            }
+        }
+    }
+}
 /// Bla bla bla
 pub fn block<F: Future>(future: F) -> F::Output {
     tokio::runtime::Builder::new_current_thread()
