@@ -3,6 +3,8 @@
 use crate::chain::error::Error::{InvalidMnemonic, MnemonicParseFailed};
 use bip39::Error as Bip39Error;
 use cosmrs::bip32::Error as Bip32Error;
+use cosmrs::proto::prost::EncodeError;
+use cosmrs::tendermint::Error as TendermintError;
 use cosmrs::Error as CosmosError;
 use cosmrs::Error::Crypto;
 use cosmrs::ErrorReport as CosmosErrorReport;
@@ -22,6 +24,14 @@ pub enum Error {
     /// Cosmos error.
     #[error("Cosmos error : {0}")]
     Cosmos(CosmosError),
+
+    /// Cosmos error.
+    #[error("Tendermint error : {0}")]
+    Tendermint(String),
+
+    /// Prost encode error.
+    #[error("Protobuf encoding error: {0}")]
+    Encode(EncodeError),
 }
 
 impl From<Bip39Error> for Error {
@@ -45,5 +55,17 @@ impl From<CosmosError> for Error {
 impl From<CosmosErrorReport> for Error {
     fn from(_: CosmosErrorReport) -> Self {
         Error::Cosmos(Crypto)
+    }
+}
+
+impl From<EncodeError> for Error {
+    fn from(err: EncodeError) -> Self {
+        Error::Encode(err)
+    }
+}
+
+impl From<TendermintError> for Error {
+    fn from(err: TendermintError) -> Self {
+        Error::Tendermint(err.to_string())
     }
 }

@@ -1,5 +1,6 @@
 use crate::application::APP;
-use crate::chain::faucet::FaucetClient;
+use crate::chain::account::Account;
+use crate::chain::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
 use abscissa_core::Application;
@@ -9,10 +10,9 @@ use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastTxRequest;
 use cosmrs::bank::MsgSend;
 use cosmrs::proto::prost;
-use cosmrs::tendermint::chain::Id;
-use cosmrs::tx::{Fee, Msg, SignDoc, SignerInfo};
+use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use cosmrs::Error as CosmosError;
-use cosmrs::{tx, AccountId, Coin};
+use cosmrs::{AccountId, Coin};
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
@@ -35,9 +35,7 @@ impl CommandExecutable for RequestCmd {
     ) -> Result<(), Error> {
         let config = &APP.config();
 
-        let faucet = FaucetClient::new(&config.faucet.mnemonic)?;
-
-        let account = get_account(faucet.address.clone()).await.unwrap();
+        let sender = Account::new(&config.faucet.mnemonic, &config.chain.prefix)?;
 
         let amount = Coin {
             amount: config.faucet.amount_send as u128,
@@ -45,36 +43,27 @@ impl CommandExecutable for RequestCmd {
         };
 
         let msg_send = MsgSend {
-            from_address: faucet.address.clone(),
+            from_address: sender.address.clone(),
             to_address: self.address.parse().unwrap(),
             amount: vec![amount.clone()],
         };
 
-        let chain_id: Id = config.chain.chain_id.parse().unwrap();
-        let account_number = account.account_number;
-        let sequence_number = account.sequence;
         let gas = config.faucet.gas_limit;
         let timeout_height = 0u16;
         let memo = &config.faucet.memo;
 
-        let tx_body = tx::Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
+        let tx_body = Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
 
-        let signer_info =
-            SignerInfo::single_direct(Some(faucet.signing_key.public_key()), sequence_number);
-
-        let auth_info = signer_info.auth_info(Fee::from_amount_and_gas(amount, gas));
-
-        let sign_doc = SignDoc::new(&tx_body, &auth_info, &chain_id, account_number).unwrap();
-
-        let tx_signed = sign_doc.sign(&faucet.signing_key).unwrap();
-
-        let tx_bytes = tx_signed.to_bytes().unwrap();
+        let tx_signed = sign_tx(&tx_body, sender, Fee::from_amount_and_gas(amount, gas)).await?;
 
         let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
             .await
             .unwrap();
 
-        let request = tonic::Request::new(BroadcastTxRequest { tx_bytes, mode: 2 });
+        let request = tonic::Request::new(BroadcastTxRequest {
+            tx_bytes: tx_signed,
+            mode: 2,
+        });
 
         let tx_response = client.broadcast_tx(request).await.unwrap();
 
@@ -129,4 +118,26 @@ async fn get_account(
             id: addr.to_string(),
         })?,
     )
+}
+
+async fn sign_tx(body: &Body, sender: Account, fee: Fee) -> Result<Vec<u8>, ChainError> {
+    let config = APP.config();
+
+    let account = get_account(sender.address.clone()).await.unwrap();
+
+    let public_key = sender.signing_key()?.public_key().clone();
+    let signer_info = SignerInfo::single_direct(Some(public_key), account.sequence);
+
+    let auth_info = signer_info.auth_info(fee);
+
+    let sign_doc = SignDoc::new(
+        body,
+        &auth_info,
+        &config.chain.chain_id.parse()?,
+        account.account_number,
+    )?;
+
+    let tx_signed = sign_doc.sign(&sender.signing_key()?)?;
+
+    tx_signed.to_bytes().map_err(|err| ChainError::from(err))
 }
