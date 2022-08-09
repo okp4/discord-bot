@@ -2,6 +2,7 @@
 
 use std::fmt::Debug;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
+use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use tonic::codegen::{Body, Bytes, StdError};
 use tonic::transport::Channel;
 use crate::chain::error::Error;
@@ -9,7 +10,7 @@ use crate::chain::error::Error;
 /// Hold all necessary client and service for cosmos chain
 #[derive(Debug, Clone)]
 pub struct Client<T> {
-    channel: T,
+    channel: Box<T>,
 }
 
 impl<T> Client<T>
@@ -19,13 +20,14 @@ impl<T> Client<T>
     T::ResponseBody: Body<Data = Bytes> + Send + 'static,
     <T::ResponseBody as Body>::Error: Into<StdError> + Send, {
 
-    // pub async fn new<T>(inner: T) -> Client<T> {
-    //     Self { channel: inner }
-    // }
-
     /// returns the auth client module endpoint
     pub fn auth(self) -> AuthClient<T> {
-        AuthClient::new(self.channel)
+        AuthClient::new(*self.channel)
+    }
+
+    /// return transaction service module endpoint
+    pub fn tx(self) -> ServiceClient<T> {
+        ServiceClient::new(*self.channel)
     }
 }
 
@@ -40,7 +42,7 @@ impl Client<Channel> {
         tonic::transport::Endpoint::new(endpoint)
             .map_err(|err| Error::Connection(err.to_string()))?
             .connect().await
-            .map(|channel| Client { channel })
+            .map(|channel| Client { channel: Box::new(channel) })
             .map_err(|err| Error::Connection(err.to_string()))
     }
 }

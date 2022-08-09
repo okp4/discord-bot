@@ -19,7 +19,7 @@ pub struct Account {
 
 impl Account {
     /// Create a new faucet client based on the sender mnemonic account and address prefix.
-    pub fn new(mnemonic: &String, address_prefix: &str) -> Result<Self, Error> {
+    pub fn new(mnemonic: String, address_prefix: &str) -> Result<Self, Error> {
         let mnemonic = Mnemonic::parse(mnemonic)?;
 
         let private_key = Self::signing_key_from(&mnemonic)?;

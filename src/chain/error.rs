@@ -36,6 +36,10 @@ pub enum Error {
     /// Prost encode error.
     #[error("Protobuf encoding error: {0}")]
     Encode(EncodeError),
+
+    /// Client not initialized
+    #[error("GRPC client not initialized")]
+    NotInitialized,
 }
 
 impl From<Bip39Error> for Error {

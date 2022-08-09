@@ -1,13 +1,17 @@
 //! DiscordBot Abscissa Application
 
+use std::future::Future;
 use abscissa_core::{
     application::{self, AppCell},
     config::{self, CfgCell},
     trace, Application, FrameworkError, StandardPaths,
 };
+use tonic::transport::Channel;
 use tracing::info;
 
 use crate::{commands::EntryPoint, config::DiscordBotConfig};
+use crate::chain::client::Client;
+use crate::chain::error::Error;
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();
@@ -20,6 +24,9 @@ pub struct DiscordBotApp {
 
     /// Application state.
     state: application::State<Self>,
+
+    /// GRPC client connection.
+    pub client: Result<Client<Channel>, Error>,
 }
 
 /// Initialize a new application instance.
@@ -28,6 +35,7 @@ impl Default for DiscordBotApp {
         Self {
             config: CfgCell::default(),
             state: application::State::default(),
+            client: Err(Error::NotInitialized),
         }
     }
 }
@@ -71,8 +79,15 @@ impl Application for DiscordBotApp {
     fn after_config(&mut self, config: Self::Cfg) -> Result<(), FrameworkError> {
         let mut components = self.state.components_mut();
         components.after_config(&config)?;
-        self.config.set_once(config);
-        Ok(())
+
+        block(async  {
+            self.client = Client::new(config.chain.grpc_address.to_string()).await;
+
+
+            self.config.set_once(config);
+
+            Ok(())
+        })
     }
 
     /// Get tracing configuration from command-line options
@@ -83,4 +98,13 @@ impl Application for DiscordBotApp {
             trace::Config::default()
         }
     }
+}
+
+/// Bla bla bla
+pub fn block<F: Future>(future: F) -> F::Output {
+    tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(future)
 }

@@ -5,8 +5,6 @@ use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
 use abscissa_core::Application;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{BaseAccount, QueryAccountRequest};
-// use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient;
-use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastTxRequest;
 use cosmrs::bank::MsgSend;
 use cosmrs::proto::prost;
@@ -18,6 +16,7 @@ use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use crate::chain::client::Client;
+use tonic::transport::Channel;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
@@ -36,7 +35,7 @@ impl CommandExecutable for RequestCmd {
     ) -> Result<(), Error> {
         let config = &APP.config();
 
-        let sender = Account::new(&config.faucet.mnemonic, &config.chain.prefix)?;
+        let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)?;
 
         let amount = Coin {
             amount: config.faucet.amount_send as u128,
@@ -55,18 +54,18 @@ impl CommandExecutable for RequestCmd {
 
         let tx_body = Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
 
-        let tx_signed = sign_tx(&tx_body, sender, Fee::from_amount_and_gas(amount, gas)).await?;
+        let tx_signed = sign_tx(&APP.client.as_ref().unwrap(), &tx_body, sender, Fee::from_amount_and_gas(amount, gas)).await?;
 
-        let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
-            .await
-            .unwrap();
+        // // /**/let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
+        //     .await
+        //     .unwrap();
 
         let request = tonic::Request::new(BroadcastTxRequest {
             tx_bytes: tx_signed,
             mode: 2,
         });
 
-        let tx_response = client.broadcast_tx(request).await.unwrap();
+        let tx_response = &APP.client.as_ref().unwrap().clone().tx().broadcast_tx(request).await.unwrap();
 
         let content = format!(
             "💵 You will receive {}{}.
@@ -100,16 +99,15 @@ where
 }
 
 async fn get_account(
+    client: &Client<Channel>,
     addr: AccountId,
 ) -> Result<BaseAccount, Box<dyn std::error::Error + Send + Sync>> {
-
-    let client = Client::new("https://grpc.devnet.staging.okp4.network:443".to_string()).await?;
 
     let request = tonic::Request::new(QueryAccountRequest {
         address: addr.to_string(),
     });
 
-    let response = client.auth().account(request).await?;
+    let response = client.clone().auth().account(request).await?;
 
     let account_response = response
         .get_ref()
@@ -125,10 +123,10 @@ async fn get_account(
     )
 }
 
-async fn sign_tx(body: &Body, sender: Account, fee: Fee) -> Result<Vec<u8>, ChainError> {
+async fn sign_tx(client: &Client<Channel>, body: &Body, sender: Account, fee: Fee) -> Result<Vec<u8>, ChainError> {
     let config = APP.config();
 
-    let account = get_account(sender.address.clone()).await.unwrap();
+    let account = get_account(client, sender.address.clone()).await.unwrap();
 
     let public_key = sender.signing_key()?.public_key().clone();
     let signer_info = SignerInfo::single_direct(Some(public_key), account.sequence);
