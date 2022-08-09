@@ -463,39 +463,28 @@ checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 
 [[package]]
 name = "cosmos-sdk-proto"
-version = "0.13.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bb61f3d2224c90ea78e1fa7444787761a549170c46b6b0ed09b93f9b7e4076a"
+checksum = "20b42021d8488665b1a0d9748f1f81df7235362d194f44481e2e61bf376b77b4"
 dependencies = [
- "prost",
- "prost-types",
+ "prost 0.11.0",
+ "prost-types 0.11.1",
  "tendermint-proto",
  "tonic",
 ]
 
 [[package]]
-name = "cosmos-sdk-proto"
-version = "0.13.0"
-source = "git+https://github.com/okp4/cosmos-rust?branch=fix/addr-prefix-check#31bbcfcac630898c22b093c7cd43056510c47932"
-dependencies = [
- "prost",
- "prost-types",
- "tendermint-proto",
-]
-
-[[package]]
 name = "cosmrs"
-version = "0.8.0"
-source = "git+https://github.com/okp4/cosmos-rust?branch=fix/addr-prefix-check#31bbcfcac630898c22b093c7cd43056510c47932"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3903590099dcf1ea580d9353034c9ba1dbf55d1389a5bd2ade98535c3445d1f9"
 dependencies = [
  "bip32",
- "cosmos-sdk-proto 0.13.0 (git+https://github.com/okp4/cosmos-rust?branch=fix/addr-prefix-check)",
+ "cosmos-sdk-proto",
  "ecdsa",
  "eyre",
  "getrandom",
  "k256",
- "prost",
- "prost-types",
  "rand_core 0.6.3",
  "serde",
  "serde_json",
@@ -619,16 +608,16 @@ dependencies = [
  "abscissa_tokio",
  "bip39",
  "clap",
- "cosmos-sdk-proto 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cosmos-sdk-proto",
  "cosmrs",
  "hyper",
  "metrics 0.20.1",
  "metrics-exporter-prometheus",
  "metrics-process-promstyle",
  "once_cell",
- "prost",
- "prost-build",
- "prost-types",
+ "prost 0.11.0",
+ "prost-build 0.11.1",
+ "prost-types 0.11.1",
  "prost-wkt-build",
  "serde",
  "serenity",
@@ -1606,7 +1595,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71adf41db68aa0daaefc69bb30bcd68ded9b9abaad5d1fbb6304c4fb390e083e"
 dependencies = [
  "bytes",
- "prost-derive",
+ "prost-derive 0.10.1",
+]
+
+[[package]]
+name = "prost"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "399c3c31cdec40583bb68f0b18403400d01ec4289c383aa047560439952c4dd7"
+dependencies = [
+ "bytes",
+ "prost-derive 0.11.0",
 ]
 
 [[package]]
@@ -1624,8 +1623,28 @@ dependencies = [
  "log",
  "multimap",
  "petgraph",
- "prost",
- "prost-types",
+ "prost 0.10.4",
+ "prost-types 0.10.1",
+ "regex",
+ "tempfile",
+ "which",
+]
+
+[[package]]
+name = "prost-build"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f835c582e6bd972ba8347313300219fed5bfa52caf175298d860b61ff6069bb"
+dependencies = [
+ "bytes",
+ "heck",
+ "itertools",
+ "lazy_static",
+ "log",
+ "multimap",
+ "petgraph",
+ "prost 0.11.0",
+ "prost-types 0.11.1",
  "regex",
  "tempfile",
  "which",
@@ -1645,13 +1664,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "prost-derive"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7345d5f0e08c0536d7ac7229952590239e77abf0a0100a1b1d890add6ea96364"
+dependencies = [
+ "anyhow",
+ "itertools",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "prost-types"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d0a014229361011dc8e69c8a1ec6c2e8d0f2af7c91e3ea3f5b2170298461e68"
 dependencies = [
  "bytes",
- "prost",
+ "prost 0.10.4",
+]
+
+[[package]]
+name = "prost-types"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4dfaa718ad76a44b3415e6c4d53b17c8f99160dcb3a99b10470fce8ad43f6e3e"
+dependencies = [
+ "bytes",
+ "prost 0.11.0",
 ]
 
 [[package]]
@@ -1661,9 +1703,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "234708ae8468e8dfde403a1b91aa8e4a32ea57dc35c6a8c044b99eeb7f891884"
 dependencies = [
  "convert_case",
- "prost",
- "prost-build",
- "prost-types",
+ "prost 0.10.4",
+ "prost-build 0.10.4",
+ "prost-types 0.10.1",
  "quote",
 ]
 
@@ -2280,9 +2322,9 @@ dependencies = [
 
 [[package]]
 name = "tendermint"
-version = "0.23.8"
+version = "0.23.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a199518e0366ba0aeb0d0e0a59dbd99ea0bdc14280f414ecc758c9228a454ad8"
+checksum = "467f82178deeebcd357e1273a0c0b77b9a8a0313ef7c07074baebe99d87851f4"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2293,8 +2335,8 @@ dependencies = [
  "k256",
  "num-traits",
  "once_cell",
- "prost",
- "prost-types",
+ "prost 0.11.0",
+ "prost-types 0.11.1",
  "ripemd160",
  "serde",
  "serde_bytes",
@@ -2311,16 +2353,16 @@ dependencies = [
 
 [[package]]
 name = "tendermint-proto"
-version = "0.23.8"
+version = "0.23.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b303d6387aaea38cea7ef924476d1f798573044e7b4f6ddd1166ac5184b2281"
+checksum = "68ce80bf536476db81ecc9ebab834dc329c9c1509a694f211a73858814bfe023"
 dependencies = [
  "bytes",
  "flex-error",
  "num-derive",
  "num-traits",
- "prost",
- "prost-types",
+ "prost 0.11.0",
+ "prost-types 0.11.1",
  "serde",
  "serde_bytes",
  "subtle-encoding",
@@ -2491,9 +2533,9 @@ dependencies = [
 
 [[package]]
 name = "tonic"
-version = "0.7.2"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be9d60db39854b30b835107500cf0aca0b0d14d6e1c3de124217c23a29c2ddb"
+checksum = "498f271adc46acce75d66f639e4d35b31b2394c295c82496727dafa16d465dd2"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2509,8 +2551,8 @@ dependencies = [
  "hyper-timeout",
  "percent-encoding",
  "pin-project",
- "prost",
- "prost-derive",
+ "prost 0.11.0",
+ "prost-derive 0.11.0",
  "tokio",
  "tokio-stream",
  "tokio-util",
@@ -2523,13 +2565,13 @@ dependencies = [
 
 [[package]]
 name = "tonic-build"
-version = "0.7.2"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9263bf4c9bfaae7317c1c2faf7f18491d2fe476f70c414b73bf5d445b00ffa1"
+checksum = "2fbcd2800e34e743b9ae795867d5f77b535d3a3be69fd731e39145719752df8c"
 dependencies = [
  "prettyplease",
  "proc-macro2",
- "prost-build",
+ "prost-build 0.11.1",
  "quote",
  "syn",
 ]

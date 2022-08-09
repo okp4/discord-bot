@@ -13,15 +13,15 @@ abscissa_core = { version = "0.6.0" }
 abscissa_tokio = { version = "0.6.0-pre.2", features = ["actix"] }
 bip39 = "1"
 clap = "3"
-cosmos-sdk-proto = "0.13.0"
-cosmrs = { git = "https://github.com/okp4/cosmos-rust", branch = "fix/addr-prefix-check" }
+cosmos-sdk-proto = "0.14.0"
+cosmrs = { version = "0.9.0" }
 hyper = "0.14.20"
 metrics = { version = "^0.20" }
 metrics-exporter-prometheus = { version = "0.11.0", default-features = false, features = [
   "http-listener",
 ] }
-prost = "0.10"
-prost-types = "0.10"
+prost = "0.11.0"
+prost-types = "0.11.1"
 serde = { version = "1", features = ["serde_derive"] }
 serenity = { version = "0.11", default-features = false, features = [
   "client",
@@ -33,7 +33,7 @@ strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
 thiserror = "1"
 tokio = { version = "1.0", features = ["time", "macros", "tracing"] }
-tonic = "0.7"
+tonic = "0.8.0"
 tracing = { version = "0.1.36", features = ["log"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
@@ -44,6 +44,6 @@ abscissa_core = { version = "0.6.0", features = ["testing"] }
 once_cell = "1.2"
 
 [build-dependencies]
-prost-build = "0.10"
+prost-build = "0.11.1"
 prost-wkt-build = "0.3"
-tonic-build = "0.7"
+tonic-build = "0.8.0"
