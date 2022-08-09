@@ -4,6 +4,8 @@ use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
+use tonic::transport::Channel;
+use crate::chain::client::Client as GRPCClient;
 
 pub struct PingCmd {}
 
@@ -15,6 +17,7 @@ impl CommandExecutable for PingCmd {
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,
+        _: &GRPCClient<Channel>,
     ) -> Result<(), Error> {
         command
             .create_interaction_response(&ctx.http, |response| {
