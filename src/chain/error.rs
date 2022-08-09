@@ -21,6 +21,10 @@ pub enum Error {
     #[error("Invalid mnemonic : {0}")]
     InvalidMnemonic(Bip32Error),
 
+    /// Invalid grpc uri
+    #[error("Failed connect to grpc endpoint: {0}")]
+    Connection(String),
+
     /// Cosmos error.
     #[error("Cosmos error : {0}")]
     Cosmos(CosmosError),

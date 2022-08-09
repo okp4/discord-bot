@@ -4,8 +4,8 @@ use crate::chain::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
 use abscissa_core::Application;
-use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{BaseAccount, QueryAccountRequest};
+// use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastTxRequest;
 use cosmrs::bank::MsgSend;
@@ -17,6 +17,7 @@ use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
+use crate::chain::client::Client;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
@@ -101,11 +102,15 @@ where
 async fn get_account(
     addr: AccountId,
 ) -> Result<BaseAccount, Box<dyn std::error::Error + Send + Sync>> {
-    let mut client = QueryClient::connect("http://[::1]:9090").await?;
+
+    let client = Client::new("https://grpc.devnet.staging.okp4.network:443".to_string()).await?;
+
     let request = tonic::Request::new(QueryAccountRequest {
         address: addr.to_string(),
     });
-    let response = client.account(request).await?;
+
+    let response = client.auth().account(request).await?;
+
     let account_response = response
         .get_ref()
         .account
