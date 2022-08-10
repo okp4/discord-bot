@@ -3,7 +3,7 @@ use crate::chain::account::Account;
 use crate::chain::client::Client as GRPCClient;
 use crate::chain::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
-use crate::discord::error::Error;
+use crate::discord::error::{Error, ErrorKind};
 use abscissa_core::Application;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{BaseAccount, QueryAccountRequest};
 use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastTxRequest;
@@ -45,7 +45,13 @@ impl CommandExecutable for RequestCmd {
 
         let msg_send = MsgSend {
             from_address: sender.address.clone(),
-            to_address: self.address.parse().unwrap(),
+            to_address: self.address.parse().map_err(|_| {
+                Error::from(ErrorKind::Chain(ChainError::Cosmos(
+                    CosmosError::AccountId {
+                        id: self.address.to_string(),
+                    },
+                )))
+            })?,
             amount: vec![amount.clone()],
         };
 
