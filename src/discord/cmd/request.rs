@@ -17,6 +17,7 @@ use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use tonic::transport::Channel;
+use tonic::Status;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
@@ -79,7 +80,12 @@ impl CommandExecutable for RequestCmd {
             .tx()
             .broadcast_tx(request)
             .await
-            .unwrap();
+            .and_then(|resp| {
+                resp.get_ref()
+                    .tx_response
+                    .clone()
+                    .ok_or_else(|| Status::not_found("No transaction response"))
+            })?;
 
         let content = format!(
             "💵 You will receive {}{}.
@@ -89,11 +95,12 @@ impl CommandExecutable for RequestCmd {
             \t- ⛽️ Gas used: {}",
             config.faucet.amount_send,
             config.chain.denom,
-            tx_response.get_ref().tx_response.as_ref().unwrap().txhash,
-            tx_response.get_ref().tx_response.as_ref().unwrap().code,
-            tx_response.get_ref().tx_response.as_ref().unwrap().raw_log,
-            tx_response.get_ref().tx_response.as_ref().unwrap().gas_used
+            tx_response.txhash,
+            tx_response.code,
+            tx_response.raw_log,
+            tx_response.gas_used
         );
+
         command
             .create_interaction_response(&ctx.http, |response| {
                 response
@@ -112,15 +119,17 @@ where
     M::decode(&msg.value[..]).ok()
 }
 
-async fn get_account(
-    client: &GRPCClient<Channel>,
-    addr: AccountId,
-) -> Result<BaseAccount, Box<dyn std::error::Error + Send + Sync>> {
+async fn get_account(client: &GRPCClient<Channel>, addr: AccountId) -> Result<BaseAccount, Error> {
     let request = tonic::Request::new(QueryAccountRequest {
         address: addr.to_string(),
     });
 
-    let response = client.clone().auth().account(request).await?;
+    let response = client
+        .clone()
+        .auth()
+        .account(request)
+        .await
+        .map_err(Error::from)?;
 
     let account_response = response
         .get_ref()
@@ -128,7 +137,8 @@ async fn get_account(
         .as_ref()
         .ok_or(CosmosError::AccountId {
             id: addr.to_string(),
-        })?;
+        })
+        .map_err(Error::from)?;
     Ok(
         unpack_from_any(account_response).ok_or(CosmosError::AccountId {
             id: addr.to_string(),
@@ -144,7 +154,9 @@ async fn sign_tx(
 ) -> Result<Vec<u8>, ChainError> {
     let config = APP.config();
 
-    let account = get_account(client, sender.address.clone()).await.unwrap();
+    let account = get_account(client, sender.address.clone())
+        .await
+        .map_err(|e| ChainError::Connection(e.to_string()))?;
 
     let public_key = sender.signing_key()?.public_key();
     let signer_info = SignerInfo::single_direct(Some(public_key), account.sequence);

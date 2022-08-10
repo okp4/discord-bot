@@ -9,6 +9,7 @@ use std::{
     ops::Deref,
 };
 use thiserror::Error;
+use tonic::Status;
 
 /// Kinds of errors
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
@@ -32,6 +33,10 @@ pub enum ErrorKind {
     /// Errors from the grpc client
     #[error("GRPC client error : {0}")]
     Chain(ChainError),
+
+    /// Request error
+    #[error("Request error : {0}")]
+    Status(String),
 }
 
 impl ErrorKind {
@@ -92,5 +97,11 @@ impl From<ChainError> for Error {
 impl From<CosmosError> for Error {
     fn from(err: CosmosError) -> Self {
         Error::from(ChainError::from(err))
+    }
+}
+
+impl From<Status> for Error {
+    fn from(err: Status) -> Self {
+        Error::from(ErrorKind::Status(err.to_string()))
     }
 }
