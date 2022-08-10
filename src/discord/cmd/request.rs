@@ -15,8 +15,8 @@ use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
-use crate::chain::client::Client;
 use tonic::transport::Channel;
+use crate::chain::client::Client as GRPCClient;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
@@ -32,9 +32,9 @@ impl CommandExecutable for RequestCmd {
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,
+        grpc_client: &GRPCClient<Channel>,
     ) -> Result<(), Error> {
         let config = &APP.config();
-        let mut client = &APP.client().await;
 
         let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)?;
 
@@ -55,7 +55,13 @@ impl CommandExecutable for RequestCmd {
 
         let tx_body = Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
 
-        let tx_signed = sign_tx(&client.clone(), &tx_body, sender, Fee::from_amount_and_gas(amount, gas)).await?;
+        let tx_signed = sign_tx(
+            grpc_client,
+            &tx_body,
+            sender,
+            Fee::from_amount_and_gas(amount, gas),
+        )
+        .await?;
 
         // // /**/let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
         //     .await
@@ -66,7 +72,7 @@ impl CommandExecutable for RequestCmd {
             mode: 2,
         });
 
-        let tx_response = client.clone().tx().broadcast_tx(request).await.unwrap();
+        let tx_response = grpc_client.clone().tx().broadcast_tx(request).await.unwrap();
 
         let content = format!(
             "💵 You will receive {}{}.
@@ -100,10 +106,9 @@ where
 }
 
 async fn get_account(
-    client: &Client<Channel>,
+    client: &GRPCClient<Channel>,
     addr: AccountId,
 ) -> Result<BaseAccount, Box<dyn std::error::Error + Send + Sync>> {
-
     let request = tonic::Request::new(QueryAccountRequest {
         address: addr.to_string(),
     });
@@ -124,7 +129,12 @@ async fn get_account(
     )
 }
 
-async fn sign_tx(client: &Client<Channel>, body: &Body, sender: Account, fee: Fee) -> Result<Vec<u8>, ChainError> {
+async fn sign_tx(
+    client: &GRPCClient<Channel>,
+    body: &Body,
+    sender: Account,
+    fee: Fee,
+) -> Result<Vec<u8>, ChainError> {
     let config = APP.config();
 
     let account = get_account(client, sender.address.clone()).await.unwrap();

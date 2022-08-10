@@ -1,16 +1,13 @@
 //! DiscordBot Abscissa Application
 
-use std::future::Future;
 use abscissa_core::{
     application::{self, AppCell},
     config::{self, CfgCell},
     trace, Application, FrameworkError, StandardPaths,
 };
-use tonic::transport::Channel;
 use tracing::info;
 
 use crate::{commands::EntryPoint, config::DiscordBotConfig};
-use crate::chain::client::Client;
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();
@@ -23,9 +20,6 @@ pub struct DiscordBotApp {
 
     /// Application state.
     state: application::State<Self>,
-
-    /// GRPC client connection.
-    client: Option<Box<Client<Channel>>>,
 }
 
 /// Initialize a new application instance.
@@ -34,7 +28,6 @@ impl Default for DiscordBotApp {
         Self {
             config: CfgCell::default(),
             state: application::State::default(),
-            client: None,
         }
     }
 }
@@ -91,25 +84,4 @@ impl Application for DiscordBotApp {
             trace::Config::default()
         }
     }
-}
-
-impl DiscordBotApp {
-    pub async fn client(&mut self) -> Client<Channel>  {
-        match &self.client {
-            Some(c) => *c.clone(),
-            None => {
-                let new_client = Client::new(self.config().chain.grpc_address.to_string()).await.unwrap();
-                self.client = Some(Box::new(new_client));
-                *self.client.clone().unwrap()
-            }
-        }
-    }
-}
-/// Bla bla bla
-pub fn block<F: Future>(future: F) -> F::Output {
-    tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(future)
 }

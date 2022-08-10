@@ -4,12 +4,14 @@ pub(crate) mod ping;
 pub(crate) mod request;
 
 use crate::discord::error::Error;
+use crate::chain::client::Client as GRPCClient;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::Interaction;
 use strum_macros::Display;
 use strum_macros::EnumString;
+use tonic::transport::Channel;
 
 /// `CommandExecutable` trait is used to make a discord command execuable by the bot.
 #[async_trait]
@@ -20,6 +22,7 @@ pub trait CommandExecutable {
         _: &Context,
         _: &Interaction,
         _: &ApplicationCommandInteraction,
+        _: &GRPCClient<Channel>,
     ) -> Result<(), Error>;
 }
 /// The different supported commands.
