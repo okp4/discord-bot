@@ -117,7 +117,9 @@ impl EventHandler for Handler {
 
                 let execution_result: Result<(), DiscordError> = match discord_command {
                     Ok(DiscordCommand::Ping) => {
-                        PingCmd {}.execute(&ctx, &interaction, command, &self.grpc_client).await
+                        PingCmd {}
+                            .execute(&ctx, &interaction, command, &self.grpc_client)
+                            .await
                     }
                     Ok(DiscordCommand::Request) => {
                         match command
@@ -139,7 +141,10 @@ impl EventHandler for Handler {
                                 info!("Request command to address : {}", address);
                                 RequestCmd { address }
                             }) {
-                            Ok(cmd) => cmd.execute(&ctx, &interaction, &command, &self.grpc_client).await,
+                            Ok(cmd) => {
+                                cmd.execute(&ctx, &interaction, command, &self.grpc_client)
+                                    .await
+                            }
                             Err(why) => Err(why),
                         }
                     }
@@ -227,7 +232,9 @@ pub async fn start(token: &str, guild_id: u64) -> Result<(), Error> {
         }
         Err(why) => {
             error!("❌ Failed connection to grpc endpoint: {}", why);
-            Err(Error::from(ErrorKind::Client("Failed launch bot without grpc connection".to_string())))
+            Err(Error::from(ErrorKind::Client(
+                "Failed launch bot without grpc connection".to_string(),
+            )))
         }
     };
 

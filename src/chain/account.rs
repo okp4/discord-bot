@@ -35,7 +35,6 @@ impl Account {
 
     fn signing_key_from(mnemonic: &Mnemonic) -> Result<SigningKey, Error> {
         let derivation_path: DerivationPath = DERIVATION_PATH.to_string().parse().unwrap();
-        SigningKey::derive_from_path(mnemonic.to_seed(""), &derivation_path)
-            .map_err(|err| Error::from(err))
+        SigningKey::derive_from_path(mnemonic.to_seed(""), &derivation_path).map_err(Error::from)
     }
 }

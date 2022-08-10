@@ -3,8 +3,8 @@
 pub(crate) mod ping;
 pub(crate) mod request;
 
-use crate::discord::error::Error;
 use crate::chain::client::Client as GRPCClient;
+use crate::discord::error::Error;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;

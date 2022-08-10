@@ -1,5 +1,6 @@
 use crate::application::APP;
 use crate::chain::account::Account;
+use crate::chain::client::Client as GRPCClient;
 use crate::chain::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
@@ -16,7 +17,6 @@ use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use tonic::transport::Channel;
-use crate::chain::client::Client as GRPCClient;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
@@ -63,16 +63,17 @@ impl CommandExecutable for RequestCmd {
         )
         .await?;
 
-        // // /**/let mut client = ServiceClient::connect(config.chain.grpc_address.to_string())
-        //     .await
-        //     .unwrap();
-
         let request = tonic::Request::new(BroadcastTxRequest {
             tx_bytes: tx_signed,
             mode: 2,
         });
 
-        let tx_response = grpc_client.clone().tx().broadcast_tx(request).await.unwrap();
+        let tx_response = grpc_client
+            .clone()
+            .tx()
+            .broadcast_tx(request)
+            .await
+            .unwrap();
 
         let content = format!(
             "💵 You will receive {}{}.
@@ -102,7 +103,7 @@ fn unpack_from_any<M>(msg: &prost_types::Any) -> Option<M>
 where
     M: prost::Message + Default,
 {
-    Some(M::decode(&msg.value[..]).ok()?)
+    M::decode(&msg.value[..]).ok()
 }
 
 async fn get_account(
@@ -123,7 +124,7 @@ async fn get_account(
             id: addr.to_string(),
         })?;
     Ok(
-        unpack_from_any(&account_response).ok_or(CosmosError::AccountId {
+        unpack_from_any(account_response).ok_or(CosmosError::AccountId {
             id: addr.to_string(),
         })?,
     )
@@ -139,7 +140,7 @@ async fn sign_tx(
 
     let account = get_account(client, sender.address.clone()).await.unwrap();
 
-    let public_key = sender.signing_key()?.public_key().clone();
+    let public_key = sender.signing_key()?.public_key();
     let signer_info = SignerInfo::single_direct(Some(public_key), account.sequence);
 
     let auth_info = signer_info.auth_info(fee);
@@ -153,5 +154,5 @@ async fn sign_tx(
 
     let tx_signed = sign_doc.sign(&sender.signing_key()?)?;
 
-    tx_signed.to_bytes().map_err(|err| ChainError::from(err))
+    tx_signed.to_bytes().map_err(ChainError::from)
 }
