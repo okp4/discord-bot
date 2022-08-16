@@ -1,12 +1,15 @@
 //! Error types
 
+use crate::chain::error::Error as ChainError;
 use abscissa_core::error::{BoxError, Context};
+use cosmrs::Error as CosmosError;
 use serenity::Error as SerenityError;
 use std::{
     fmt::{self, Display},
     ops::Deref,
 };
 use thiserror::Error;
+use tonic::Status;
 
 /// Kinds of errors
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
@@ -15,9 +18,25 @@ pub enum ErrorKind {
     #[error("Unknown error")]
     UnknownCommand(String),
 
+    /// Missing arg for command
+    #[error("Missing {0} arg")]
+    MissingArg(String),
+
+    /// Arg is incorrect
+    #[error("{0} arg is incorrect {1}")]
+    IncorrectArg(String, String),
+
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
     Serenity(String),
+
+    /// Errors from the grpc client
+    #[error("GRPC client error : {0}")]
+    Chain(ChainError),
+
+    /// Request error
+    #[error("Request error : {0}")]
+    Status(String),
 }
 
 impl ErrorKind {
@@ -66,5 +85,23 @@ impl From<Context<ErrorKind>> for Error {
 impl From<SerenityError> for Error {
     fn from(err: SerenityError) -> Self {
         ErrorKind::Serenity(err.to_string()).context(err).into()
+    }
+}
+
+impl From<ChainError> for Error {
+    fn from(err: ChainError) -> Self {
+        Error::from(ErrorKind::Chain(err))
+    }
+}
+
+impl From<CosmosError> for Error {
+    fn from(err: CosmosError) -> Self {
+        Error::from(ChainError::from(err))
+    }
+}
+
+impl From<Status> for Error {
+    fn from(err: Status) -> Self {
+        Error::from(ErrorKind::Status(err.to_string()))
     }
 }

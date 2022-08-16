@@ -1,6 +1,5 @@
 //! DiscordBot
 
-#![forbid(unsafe_code)]
 #![deny(
     warnings,
     missing_docs,
@@ -14,6 +13,7 @@
 )]
 
 pub mod application;
+pub mod chain;
 pub mod commands;
 pub mod components;
 pub mod config;

@@ -1,6 +1,10 @@
 //! Discord bot implementations
+use crate::chain::client::Client as GRPCClient;
+use crate::chain::error::Error as ChainError;
 use crate::discord::cmd::ping::PingCmd;
 use crate::discord::error::Error as DiscordError;
+use crate::discord::error::ErrorKind::IncorrectArg;
+use crate::discord::error::ErrorKind::MissingArg;
 use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::metrics::{
     LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
@@ -8,7 +12,9 @@ use crate::discord::metrics::{
 };
 use crate::discord::utils::interation_name;
 use crate::error::{Error, ErrorKind};
+use abscissa_core::Application;
 use metrics::{describe_counter, describe_histogram, histogram, increment_counter, Unit};
+use serenity::model::application::command::CommandOptionType;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use serenity::model::gateway::Ready;
@@ -17,12 +23,26 @@ use serenity::{async_trait, model::id::GuildId};
 use std::process::exit;
 use std::str::FromStr;
 use std::time::Instant;
+use tonic::transport::Channel;
 
+use crate::discord::cmd::request::RequestCmd;
 use crate::discord::cmd::{CommandExecutable, DiscordCommand};
+use crate::prelude::APP;
 use tracing::{debug, error, info, warn};
 
 struct Handler {
     guild_id: GuildId,
+    grpc_client: GRPCClient<Channel>,
+}
+
+impl Handler {
+    async fn new(guild_id: GuildId, grpc_address: String) -> Result<Self, ChainError> {
+        let grpc_client = GRPCClient::new(grpc_address).await?;
+        Ok(Handler {
+            guild_id,
+            grpc_client,
+        })
+    }
 }
 
 #[async_trait]
@@ -31,11 +51,24 @@ impl EventHandler for Handler {
         info!("🤝 {} is connected!", ready.user.name);
 
         let commands = GuildId::set_application_commands(&self.guild_id, &ctx.http, |commands| {
-            commands.create_application_command(|command| {
-                command
-                    .name(DiscordCommand::Ping)
-                    .description("A ping command 🏓 (for testing purposes)")
-            })
+            commands
+                .create_application_command(|command| {
+                    command
+                        .name(DiscordCommand::Ping)
+                        .description("A ping command 🏓 (for testing purposes)")
+                })
+                .create_application_command(|command| {
+                    command
+                        .name(DiscordCommand::Request)
+                        .description("Request 1know from testnet 💵")
+                        .create_option(|option| {
+                            option
+                                .name("address")
+                                .description("OKP4 address you want to receive know")
+                                .kind(CommandOptionType::String)
+                                .required(true)
+                        })
+                })
         })
         .await;
 
@@ -84,7 +117,36 @@ impl EventHandler for Handler {
 
                 let execution_result: Result<(), DiscordError> = match discord_command {
                     Ok(DiscordCommand::Ping) => {
-                        PingCmd {}.execute(&ctx, &interaction, command).await
+                        PingCmd {}
+                            .execute(&ctx, &interaction, command, &self.grpc_client)
+                            .await
+                    }
+                    Ok(DiscordCommand::Request) => {
+                        match command
+                            .data
+                            .options
+                            .first()
+                            .and_then(|v| v.value.as_ref())
+                            .ok_or_else(|| DiscordError::from(MissingArg("address".to_string())))
+                            .and_then(|v| {
+                                v.as_str().ok_or_else(|| {
+                                    DiscordError::from(IncorrectArg(
+                                        "address".to_string(),
+                                        "Should be a string".to_string(),
+                                    ))
+                                })
+                            })
+                            .map(|v| v.to_string())
+                            .map(|address| {
+                                info!("Request command to address : {}", address);
+                                RequestCmd { address }
+                            }) {
+                            Ok(cmd) => {
+                                cmd.execute(&ctx, &interaction, command, &self.grpc_client)
+                                    .await
+                            }
+                            Err(why) => Err(why),
+                        }
                     }
                     _ => Err(DiscordError::from(UnknownCommand(format!(
                         "🤔 I don't understand: {}",
@@ -151,14 +213,30 @@ pub async fn start(token: &str, guild_id: u64) -> Result<(), Error> {
 
     let intents = GatewayIntents::empty();
 
-    info!("🚀 Booting the Bot...");
+    info!("🪐 Start connection to cosmos grpc endpoint");
 
-    let result = Client::builder(&token, intents)
-        .event_handler(Handler {
-            guild_id: GuildId(guild_id),
-        })
-        .await
-        .map_err(|_| Error::from(ErrorKind::Client("Failed to create client".to_owned())));
+    let result = match Handler::new(
+        GuildId(guild_id),
+        APP.config().chain.grpc_address.to_string(),
+    )
+    .await
+    {
+        Ok(handler) => {
+            info!("🛰 Connection to cosmos grpc endpoint successful");
+            info!("🚀 Booting the Bot...");
+
+            Client::builder(&token, intents)
+                .event_handler(handler)
+                .await
+                .map_err(|_| Error::from(ErrorKind::Client("Failed to create client".to_string())))
+        }
+        Err(why) => {
+            error!("❌ Failed connection to grpc endpoint: {}", why);
+            Err(Error::from(ErrorKind::Client(
+                "Failed launch bot without grpc connection".to_string(),
+            )))
+        }
+    };
 
     match result {
         Ok(mut client) => client.start().await.map_err(Error::from),

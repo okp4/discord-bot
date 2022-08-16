@@ -72,6 +72,7 @@ impl Application for DiscordBotApp {
         let mut components = self.state.components_mut();
         components.after_config(&config)?;
         self.config.set_once(config);
+
         Ok(())
     }
 

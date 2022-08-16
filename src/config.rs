@@ -13,6 +13,12 @@ pub struct DiscordBotConfig {
 
     /// Metrics configuration
     pub metrics: MetricsSection,
+
+    /// Chain configuration
+    pub chain: ChainSection,
+
+    /// Faucet configuration
+    pub faucet: FaucetSection,
 }
 
 /// Discord section.
@@ -51,6 +57,66 @@ impl Default for MetricsSection {
         Self {
             endpoint: None,
             refresh: Duration::from_secs(1),
+        }
+    }
+}
+
+/// Chain configuration section
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ChainSection {
+    /// The chain okp4 server url.
+    pub grpc_address: String,
+
+    /// The network chain ID.
+    pub chain_id: String,
+
+    /// Token denom.
+    pub denom: String,
+
+    /// Address prefix.
+    pub prefix: String,
+}
+
+impl Default for ChainSection {
+    fn default() -> Self {
+        Self {
+            grpc_address: "http://[::1]:9090".to_string().parse().unwrap(),
+            chain_id: "localnet-okp4-1".to_string(),
+            denom: "know".to_string(),
+            prefix: "okp4".to_string(),
+        }
+    }
+}
+
+/// Faucet configuration section
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct FaucetSection {
+    /// The sender mnemonic.
+    pub mnemonic: String,
+
+    /// Fee amount.
+    pub fee_amount: i64,
+
+    /// Number of token sent
+    pub amount_send: i64,
+
+    /// Transaction description
+    pub memo: String,
+
+    /// Gas limit
+    pub gas_limit: u64,
+}
+
+impl Default for FaucetSection {
+    fn default() -> Self {
+        Self {
+            mnemonic: "".to_string(),
+            fee_amount: 0,
+            amount_send: 1,
+            memo: "Sent by økp4 discord bot".to_string(),
+            gas_limit: 200000,
         }
     }
 }
