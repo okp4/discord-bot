@@ -12,4 +12,4 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/discord_bot ./bot
 
-ENTRYPOINT ["./bot", "start"]
+ENTRYPOINT ["./bot"]
