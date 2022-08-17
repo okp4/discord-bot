@@ -42,6 +42,16 @@ jobs:
       - name: Lint yaml files
         uses: ibiqlik/action-yamllint@v3.1.0
 
+  lint-dockerfile:
+    runs-on: ubuntu-20.04
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Lint dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v2.1.0
+
   lint-cargo-toml:
     runs-on: ubuntu-20.04
     steps:
@@ -59,7 +69,7 @@ jobs:
         if: steps.changed-rust-cargo.outputs.any_changed == 'true'
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: 1.63
           default: true
           override: true
 
@@ -92,7 +102,7 @@ jobs:
         if: steps.changed-rust-files.outputs.any_changed == 'true'
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: 1.63
           default: true
           override: true
 
@@ -114,7 +124,7 @@ jobs:
       - name: Setup rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: 1.63
           default: true
           override: true
 
@@ -145,7 +155,7 @@ jobs:
       - name: Setup rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: 1.63
           default: true
           override: true
 
