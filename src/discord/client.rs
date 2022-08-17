@@ -1,11 +1,6 @@
 //! Discord bot implementations
 use crate::chain::client::Client as GRPCClient;
 use crate::chain::error::Error as ChainError;
-use crate::discord::cmd::ping::PingCmd;
-use crate::discord::error::Error as DiscordError;
-use crate::discord::error::ErrorKind::IncorrectArg;
-use crate::discord::error::ErrorKind::MissingArg;
-use crate::discord::error::ErrorKind::UnknownCommand;
 use crate::discord::metrics::{
     LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
     METRIC_DISCORD_INTERACTIONS_DURATION, METRIC_DISCORD_INTERACTIONS_TOTAL,
@@ -21,11 +16,9 @@ use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use serenity::{async_trait, model::id::GuildId};
 use std::process::exit;
-use std::str::FromStr;
 use std::time::Instant;
 use tonic::transport::Channel;
 
-use crate::discord::cmd::request::RequestCmd;
 use crate::discord::cmd::{CommandExecutable, DiscordCommand};
 use crate::prelude::APP;
 use tracing::{debug, error, info, warn};
@@ -54,12 +47,12 @@ impl EventHandler for Handler {
             commands
                 .create_application_command(|command| {
                     command
-                        .name(DiscordCommand::Ping)
+                        .name("ping")
                         .description("A ping command 🏓 (for testing purposes)")
                 })
                 .create_application_command(|command| {
                     command
-                        .name(DiscordCommand::Request)
+                        .name("request")
                         .description("Request 1know from testnet 💵")
                         .create_option(|option| {
                             option
@@ -103,7 +96,7 @@ impl EventHandler for Handler {
                 );
                 debug!("🔬Command is: {:#?}", command);
 
-                let discord_command = DiscordCommand::from_str(&command.data.name);
+                let discord_command = DiscordCommand::new(&command.data.name, command);
                 let labels = vec![
                     (LABEL_NAME_INTERACTION, interation_name(&interaction)),
                     (
@@ -115,49 +108,16 @@ impl EventHandler for Handler {
                     ),
                 ];
 
-                let execution_result: Result<(), DiscordError> = match discord_command {
-                    Ok(DiscordCommand::Ping) => {
-                        PingCmd {}
-                            .execute(&ctx, &interaction, command, &self.grpc_client)
+                let result = match discord_command {
+                    Ok(cmd) => {
+                        cmd.execute(&ctx, &interaction, command, &self.grpc_client)
                             .await
                     }
-                    Ok(DiscordCommand::Request) => {
-                        match command
-                            .data
-                            .options
-                            .first()
-                            .and_then(|v| v.value.as_ref())
-                            .ok_or_else(|| DiscordError::from(MissingArg("address".to_string())))
-                            .and_then(|v| {
-                                v.as_str().ok_or_else(|| {
-                                    DiscordError::from(IncorrectArg(
-                                        "address".to_string(),
-                                        "Should be a string".to_string(),
-                                    ))
-                                })
-                            })
-                            .map(|v| v.to_string())
-                            .map(|address| {
-                                info!("Request command to address : {}", address);
-                                RequestCmd { address }
-                            }) {
-                            Ok(cmd) => {
-                                cmd.execute(&ctx, &interaction, command, &self.grpc_client)
-                                    .await
-                            }
-                            Err(why) => Err(why),
-                        }
-                    }
-                    _ => Err(DiscordError::from(UnknownCommand(format!(
-                        "🤔 I don't understand: {}",
-                        command.data.name
-                    )))),
+                    Err(err) => Err(err),
                 };
 
-                match execution_result {
-                    Ok(_) => {
-                        info!("✅ Successful execute slash command");
-                    }
+                match result {
+                    Ok(_) => info!("✅ Successful execute slash command"),
                     Err(err) => {
                         warn!("❌ Failed to execute command: {}", err);
 
