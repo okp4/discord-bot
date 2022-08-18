@@ -102,6 +102,14 @@ Be sure you have [Rust](https://www.rust-lang.org/tools/install) properly instal
 cargo make
 ```
 
+## Docker image 🐳
+
+A docker image is also available. Usage example :
+
+```bash
+docker run okp4/discord-bot:latest start -t $TOKEN -g $GUILD_ID
+```
+
 ## You want to get involved? 😍
 
 Please check out OKP4 health files :
