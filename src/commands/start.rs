@@ -2,11 +2,11 @@
 use std::net::SocketAddr;
 use std::process;
 
-use abscissa_core::{config, Command, FrameworkError, Runnable};
+use abscissa_core::{config, Command, FrameworkError, FrameworkErrorKind, Runnable};
 use clap::Parser;
 use tracing::{error, info};
 
-use crate::config::DiscordBotConfig;
+use crate::config::{DiscordBotConfig, DiscordShardingSection};
 use crate::discord::client;
 use crate::prelude::*;
 
@@ -21,6 +21,17 @@ pub struct StartCmd {
     #[clap(short = 'g', long = "guild-id")]
     guild_id: Option<u64>,
 
+    /// The shard index ID to start.
+    /// Establish a sharded connection and start listening for events.
+    /// This will start receiving events and dispatch them to your registered handlers.
+    /// This will create a single shard by ID. If using one shard per process, you will need to start other bot process with the other shard IDs.
+    #[clap(long)]
+    shard: Option<u64>,
+
+    /// The total numbers of shards in the sharding connection.
+    #[clap(long)]
+    shards: Option<u64>,
+
     /// The prometheus endpoint.
     /// Optional. Configures an HTTP exporter that functions as a scrape endpoint for prometheus.
     /// The value is an IPv4 or IPv6 address and a port number, separated by a colon. For instance:
@@ -34,7 +45,14 @@ impl Runnable for StartCmd {
         let config = APP.config();
 
         abscissa_tokio::run(&APP, async {
-            match client::start(&config.discord.token, config.discord.guild_id, config.discord.sharding.shard, config.discord.sharding.shards).await {
+            match client::start(
+                &config.discord.token,
+                config.discord.guild_id,
+                config.discord.sharding.shard,
+                config.discord.sharding.shards,
+            )
+            .await
+            {
                 Err(why) => error!("💀 Client error: {:?}", why),
                 _ => info!("👋 Bye!"),
             }
@@ -60,6 +78,14 @@ impl config::Override<DiscordBotConfig> for StartCmd {
 
         if let Some(guild_id) = self.guild_id {
             config.discord.guild_id = guild_id
+        }
+
+        if let (Some(shard), Some(shards)) = (self.shard, self.shards) {
+            config.discord.sharding = DiscordShardingSection { shard, shards }
+        } else if let (None, Some(shards)) = (self.shard, self.shards) {
+            return Err(FrameworkError::from(FrameworkErrorKind::ConfigError.context(format!("❌ When set the `shards` ({}) attribute, you should also set the `shard` index", shards))));
+        } else if let (Some(shard), None) = (self.shard, self.shards) {
+            return Err(FrameworkError::from(FrameworkErrorKind::ConfigError.context(format!("❌ When set the `shard` ({}) index, you should also set the total number of `shards` (`--shards <NUMBER_OF_SHARD>`)", shard))));
         }
 
         if self.prometheus_endpoint.is_some() {
