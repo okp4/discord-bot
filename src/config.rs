@@ -30,6 +30,9 @@ pub struct DiscordSection {
 
     /// Guild ID (Server ID)
     pub guild_id: u64,
+
+    /// Configure the sharding strategy for this process
+    pub sharding: DiscordShardingSection,
 }
 
 impl Default for DiscordSection {
@@ -37,6 +40,26 @@ impl Default for DiscordSection {
         Self {
             token: "".to_owned(),
             guild_id: 0,
+            sharding: DiscordShardingSection::default(),
+        }
+    }
+}
+
+/// Sharding strategy configuration
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct DiscordShardingSection {
+    /// Shard index (default 0)
+    pub shard: u64,
+    /// Number of total shards (default 1)
+    pub shards: u64,
+}
+
+impl Default for DiscordShardingSection {
+    fn default() -> Self {
+        Self {
+            shard: 0,
+            shards: 1,
         }
     }
 }
