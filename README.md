@@ -101,3 +101,10 @@ Be sure you have [Rust](https://www.rust-lang.org/tools/install) properly instal
 ```sh
 cargo make
 ```
+
+## You want to get involved? 😍
+
+Please check out OKP4 health files :
+
+- [Contributing](https://github.com/okp4/.github/blob/main/CONTRIBUTING.md)
+- [Code of conduct](https://github.com/okp4/.github/blob/main/CODE_OF_CONDUCT.md)
