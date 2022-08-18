@@ -208,7 +208,7 @@ fn register_metrics() {
 }
 
 /// Start the discord bot (given a token)
-pub async fn start(token: &str, guild_id: u64) -> Result<(), Error> {
+pub async fn start(token: &str, guild_id: u64, shard: u64, shards: u64) -> Result<(), Error> {
     register_metrics();
 
     let intents = GatewayIntents::empty();
@@ -239,7 +239,7 @@ pub async fn start(token: &str, guild_id: u64) -> Result<(), Error> {
     };
 
     match result {
-        Ok(mut client) => client.start().await.map_err(Error::from),
+        Ok(mut client) => client.start_shard(shard, shards).await.map_err(Error::from),
         r => r.map(|_| ()),
     }
 }
