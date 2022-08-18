@@ -5,7 +5,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
-#[serde(deny_unknown_fields)]
+#[serde(default)]
 /// Configuration type for the discord bot
 pub struct DiscordBotConfig {
     /// discord section
