@@ -23,7 +23,7 @@ pub struct DiscordBotConfig {
 
 /// Discord section.
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct DiscordSection {
     /// Token
     pub token: String,
