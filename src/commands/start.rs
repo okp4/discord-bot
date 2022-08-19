@@ -80,13 +80,18 @@ impl config::Override<DiscordBotConfig> for StartCmd {
             config.discord.guild_id = guild_id
         }
 
-        if let (Some(shard), Some(shards)) = (self.shard, self.shards) {
-            config.discord.sharding = DiscordShardingSection { shard, shards }
-        } else if let (None, Some(shards)) = (self.shard, self.shards) {
-            return Err(FrameworkError::from(FrameworkErrorKind::ConfigError.context(format!("❌ When set the `shards` ({}) attribute, you should also set the `shard` index", shards))));
-        } else if let (Some(shard), None) = (self.shard, self.shards) {
-            return Err(FrameworkError::from(FrameworkErrorKind::ConfigError.context(format!("❌ When set the `shard` ({}) index, you should also set the total number of `shards` (`--shards <NUMBER_OF_SHARD>`)", shard))));
-        }
+        match (self.shard, self.shards) {
+            (Some(shard), Some(shards)) => {
+                config.discord.sharding = DiscordShardingSection { shard, shards }
+            }
+            (None, Some(shards)) => {
+                Err(FrameworkError::from(FrameworkErrorKind::ConfigError.context(format!("❌ When set the `shards` ({}) attribute, you should also set the `shard` index", shards))))?;
+            }
+            (Some(shard), None) => {
+                Err(FrameworkError::from(FrameworkErrorKind::ConfigError.context(format!("❌ When set the `shard` ({}) index, you should also set the total number of `shards` (`--shards <NUMBER_OF_SHARD>`)", shard))))?;
+            }
+            _ => (),
+        };
 
         if self.prometheus_endpoint.is_some() {
             config.metrics.endpoint = self.prometheus_endpoint
