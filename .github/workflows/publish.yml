@@ -93,7 +93,7 @@ jobs:
         uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKER_HUB_REGISTRY_ID }}
-          description: Docker image for https://github.com/${{ github.repository }}
+          short-description: Docker image for https://github.com/${{ github.repository }}
           password: ${{ secrets.DOCKER_HUB_REGISTRY_TOKEN }}
           repository: ${{ github.repository }}
           readme-filepath: README.md
