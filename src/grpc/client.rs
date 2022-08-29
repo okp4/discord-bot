@@ -1,6 +1,7 @@
 //! GRPC clients
 
-use crate::chain::error::Error;
+use crate::grpc::error::Error;
+use actix::{Actor, Context};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use std::fmt::Debug;
@@ -33,7 +34,7 @@ where
 
 impl Client<Channel> {
     /// Create a new client form a GRPC endpoint
-    pub async fn new<D>(endpoint: D) -> Result<Self, Error>
+    pub async fn new<D>(endpoint: D) -> Result<Client<Channel>, Error>
     where
         D: TryInto<tonic::transport::Endpoint>,
         D::Error: Into<StdError>,
@@ -47,4 +48,8 @@ impl Client<Channel> {
             })
             .map_err(|err| Error::Connection(err.to_string()))
     }
+}
+
+impl Actor for Client<Channel> {
+    type Context = Context<Self>;
 }

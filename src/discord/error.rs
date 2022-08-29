@@ -1,6 +1,6 @@
 //! Error types
 
-use crate::chain::error::Error as ChainError;
+use crate::grpc::error::Error as ChainError;
 use abscissa_core::error::{BoxError, Context};
 use cosmrs::Error as CosmosError;
 use serenity::Error as SerenityError;

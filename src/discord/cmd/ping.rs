@@ -1,4 +1,5 @@
-use crate::chain::client::Client as GRPCClient;
+//! Hold the ping command functions
+use crate::grpc::client::Client as GRPCClient;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
 use serenity::async_trait;
@@ -7,6 +8,7 @@ use serenity::model::application::interaction::application_command::ApplicationC
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use tonic::transport::Channel;
 
+/// A command to send a ping request
 pub struct PingCmd {}
 
 /// Execute the "ping" command.

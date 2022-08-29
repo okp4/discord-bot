@@ -13,10 +13,11 @@
 )]
 
 pub mod application;
-pub mod chain;
+pub mod grpc;
 pub mod commands;
 pub mod components;
 pub mod config;
 pub mod discord;
 pub mod error;
 pub mod prelude;
+pub mod messages;

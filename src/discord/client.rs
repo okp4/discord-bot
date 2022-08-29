@@ -1,7 +1,10 @@
 //! Discord bot implementations
-use crate::chain::client::Client as GRPCClient;
-use crate::chain::error::Error as ChainError;
+use crate::grpc::client::Client as GRPCClient;
+use crate::grpc::error::Error as ChainError;
+use crate::discord::cmd::CommandExecutable;
+use crate::discord::cmd::DiscordCommand;
 use crate::discord::cmd::ping::PingCmd;
+use crate::discord::cmd::request::RequestCmd;
 use crate::discord::error::Error as DiscordError;
 use crate::discord::error::ErrorKind::IncorrectArg;
 use crate::discord::error::ErrorKind::MissingArg;
@@ -25,8 +28,6 @@ use std::str::FromStr;
 use std::time::Instant;
 use tonic::transport::Channel;
 
-use crate::discord::cmd::request::RequestCmd;
-use crate::discord::cmd::{CommandExecutable, DiscordCommand};
 use crate::prelude::APP;
 use tracing::{debug, error, info, warn};
 
@@ -36,7 +37,7 @@ struct Handler {
 }
 
 impl Handler {
-    async fn new(guild_id: GuildId, grpc_address: String) -> Result<Self, ChainError> {
+    async fn new(guild_id: GuildId, grpc_address: String) -> Result<Handler, ChainError> {
         let grpc_client = GRPCClient::new(grpc_address).await?;
         Ok(Handler {
             guild_id,

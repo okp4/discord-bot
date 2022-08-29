@@ -1,9 +1,9 @@
 //! Holds some types for discord slash commands.
 
-pub(crate) mod ping;
-pub(crate) mod request;
+pub mod ping;
+pub mod request;
 
-use crate::chain::client::Client as GRPCClient;
+use crate::grpc::client::Client as GRPCClient;
 use crate::discord::error::Error;
 use serenity::async_trait;
 use serenity::client::Context;

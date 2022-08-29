@@ -1,6 +1,6 @@
 //! Error for grpc clients
 
-use crate::chain::error::Error::{InvalidMnemonic, MnemonicParseFailed};
+use crate::grpc::error::Error::{InvalidMnemonic, MnemonicParseFailed};
 use bip39::Error as Bip39Error;
 use cosmrs::bip32::Error as Bip32Error;
 use cosmrs::proto::prost::EncodeError;
