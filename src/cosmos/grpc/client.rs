@@ -1,6 +1,6 @@
 //! GRPC clients
 
-use crate::grpc::error::Error;
+use crate::cosmos::grpc::error::Error;
 use actix::{Actor, Context};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;

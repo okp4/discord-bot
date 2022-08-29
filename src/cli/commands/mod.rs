@@ -3,10 +3,11 @@
 mod start;
 
 use self::start::StartCmd;
-use crate::config::DiscordBotConfig;
 use abscissa_core::{config::Override, Command, Configurable, FrameworkError, Runnable};
 use clap::Parser;
 use std::path::PathBuf;
+
+use super::config::DiscordBotConfig;
 
 /// DiscordBot Configuration Filename
 pub const CONFIG_FILE: &str = "discord_bot.toml";

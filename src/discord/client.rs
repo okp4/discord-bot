@@ -1,6 +1,6 @@
 //! Discord bot implementations
-use crate::grpc::client::Client as GRPCClient;
-use crate::grpc::error::Error as ChainError;
+use crate::cosmos::grpc::client::Client as GRPCClient;
+use crate::cosmos::grpc::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::cmd::DiscordCommand;
 use crate::discord::cmd::ping::PingCmd;
@@ -15,7 +15,6 @@ use crate::discord::metrics::{
 };
 use crate::discord::utils::interation_name;
 use crate::error::{Error, ErrorKind};
-use abscissa_core::Application;
 use metrics::{describe_counter, describe_histogram, histogram, increment_counter, Unit};
 use serenity::model::application::command::CommandOptionType;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
@@ -28,7 +27,7 @@ use std::str::FromStr;
 use std::time::Instant;
 use tonic::transport::Channel;
 
-use crate::prelude::APP;
+use crate::cli::prelude::*;
 use tracing::{debug, error, info, warn};
 
 struct Handler {

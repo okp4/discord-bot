@@ -6,8 +6,8 @@ use abscissa_core::component::Id;
 use abscissa_core::{Component, FrameworkError, FrameworkErrorKind, Version};
 use tracing::info;
 
-use crate::application::DiscordBotApp;
-use crate::config::DiscordBotConfig;
+use crate::cli::application::DiscordBotApp;
+use crate::cli::config::DiscordBotConfig;
 
 /// Abscissa component which runs a metrics endpoint.
 #[derive(Debug)]

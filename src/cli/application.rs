@@ -7,7 +7,7 @@ use abscissa_core::{
 };
 use tracing::info;
 
-use crate::{commands::EntryPoint, config::DiscordBotConfig};
+use super::{config::DiscordBotConfig, commands::EntryPoint};
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();
@@ -54,7 +54,7 @@ impl Application for DiscordBotApp {
 
     /// Register all components used by this application.
     fn register_components(&mut self, command: &Self::Cmd) -> Result<(), FrameworkError> {
-        use crate::components::metrics::MetricsEndpoint;
+        use crate::cli::components::metrics::MetricsEndpoint;
         use abscissa_tokio::TokioComponent;
 
         info!("📌 Registering components...");
