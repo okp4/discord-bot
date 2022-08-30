@@ -1,10 +1,12 @@
 use cosmrs::auth::BaseAccount;
+use cosmrs::bank::MsgSend;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::{Body, Fee, SignDoc, SignerInfo};
 use crate::cosmos::tx::error::Error;
 
 pub struct TxHandler {
-    chainId: String,
+    pub chainId: String,
+    pub msgs: Vec<MsgSend>,
 }
 
 impl TxHandler {
