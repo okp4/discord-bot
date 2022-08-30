@@ -1,12 +1,18 @@
-//! GRPC clients
+//! Holds CosmosClient library.
 
-use crate::cosmos::grpc::error::Error;
-use actix::{Actor, Context};
+use crate::cosmos::client::error::Error;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use std::fmt::Debug;
 use tonic::codegen::{Body, Bytes, StdError};
 use tonic::transport::Channel;
+
+pub mod account;
+pub mod error;
+pub mod messages;
+mod handlers;
+mod actor;
+
 
 /// Hold all necessary client and service for cosmos chain
 #[derive(Debug, Clone)]
@@ -48,8 +54,4 @@ impl Client<Channel> {
             })
             .map_err(|err| Error::Connection(err.to_string()))
     }
-}
-
-impl Actor for Client<Channel> {
-    type Context = Context<Self>;
 }

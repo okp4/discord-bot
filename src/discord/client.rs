@@ -1,6 +1,6 @@
 //! Discord bot implementations
-use crate::cosmos::grpc::client::Client as GRPCClient;
-use crate::cosmos::grpc::error::Error as ChainError;
+use crate::cosmos::client::Client as GRPCClient;
+use crate::cosmos::client::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::cmd::DiscordCommand;
 use crate::discord::cmd::ping::PingCmd;

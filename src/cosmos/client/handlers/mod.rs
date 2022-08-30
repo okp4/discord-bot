@@ -1,3 +1,3 @@
 //! Holds grpc commands
 
-mod request;
+mod send_tx;

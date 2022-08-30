@@ -1,5 +1,5 @@
 //! Hold the ping command functions
-use crate::cosmos::grpc::client::Client as GRPCClient;
+use crate::cosmos::client::Client as GRPCClient;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::Error;
 use serenity::async_trait;

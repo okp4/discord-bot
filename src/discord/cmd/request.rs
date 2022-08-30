@@ -1,9 +1,9 @@
 //! Holds request commands functions
 
 use crate::cli::application::APP;
-use crate::cosmos::grpc::account::Account;
-use crate::cosmos::grpc::client::Client as GRPCClient;
-use crate::cosmos::grpc::error::Error as ChainError;
+use crate::cosmos::client::account::Account;
+use crate::cosmos::client::Client as GRPCClient;
+use crate::cosmos::client::error::Error as ChainError;
 use crate::discord::cmd::CommandExecutable;
 use crate::discord::error::{Error, ErrorKind};
 use abscissa_core::Application;

@@ -3,7 +3,7 @@
 pub mod ping;
 pub mod request;
 
-use crate::cosmos::grpc::client::Client as GRPCClient;
+use crate::cosmos::client::Client as GRPCClient;
 use crate::discord::error::Error;
 use serenity::async_trait;
 use serenity::client::Context;

@@ -1,3 +1,3 @@
 //! Holds Cosmos related files
 
-pub mod grpc;
+pub mod client;

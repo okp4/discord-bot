@@ -1,6 +1,6 @@
 //! Faucet module
 
-use crate::cosmos::grpc::error::Error;
+use crate::cosmos::client::error::Error;
 use bip39::Mnemonic;
 use cosmrs::bip32::DerivationPath;
 use cosmrs::crypto::secp256k1::SigningKey;
