@@ -1,7 +1,7 @@
 //! Register transaction handler
 
 use crate::cosmos::tx::messages::register::{RegisterTx, RegisterTxResult};
-use crate::cosmos::tx::tx::TxHandler;
+use crate::cosmos::tx::TxHandler;
 use actix::Handler;
 
 impl Handler<RegisterTx> for TxHandler {

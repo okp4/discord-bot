@@ -1,7 +1,7 @@
 //! Trigger transaction handler
 
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
-use crate::cosmos::tx::tx::TxHandler;
+use crate::cosmos::tx::TxHandler;
 use actix::Handler;
 use cosmrs::auth::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg};
@@ -12,7 +12,7 @@ impl Handler<TriggerTx> for TxHandler {
     type Result = TriggerTxResult;
 
     fn handle(&mut self, msg: TriggerTx, _: &mut Self::Context) -> Self::Result {
-        if self.msgs.len() == 0 {
+        if self.msgs.is_empty() {
             info!("🥹 No message to submit");
             return;
         }
@@ -35,8 +35,7 @@ impl Handler<TriggerTx> for TxHandler {
             amount: self
                 .msgs
                 .iter()
-                .map(|msg| msg.amount.clone())
-                .flatten()
+                .flat_map(|msg| msg.amount.clone())
                 .collect::<Vec<_>>(),
             gas_limit: msg.gas_limit.into(),
             payer: None,

@@ -1,4 +1,4 @@
-use crate::cosmos::tx::tx::TxHandler;
+use crate::cosmos::tx::TxHandler;
 use actix::{Actor, Context};
 
 impl Actor for TxHandler {
