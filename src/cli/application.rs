@@ -7,7 +7,7 @@ use abscissa_core::{
 };
 use tracing::info;
 
-use super::{config::DiscordBotConfig, commands::EntryPoint};
+use super::{commands::EntryPoint, config::DiscordBotConfig};
 
 /// Application state
 pub static APP: AppCell<DiscordBotApp> = AppCell::new();

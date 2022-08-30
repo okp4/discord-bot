@@ -1,7 +1,10 @@
 use actix::Handler;
 use tonic::transport::Channel;
 
-use crate::cosmos::client::{messages::send_tx::{SendTx, SendTxResult}, Client};
+use crate::cosmos::client::{
+    messages::send_tx::{SendTx, SendTxResult},
+    Client,
+};
 
 impl Handler<SendTx> for Client<Channel> {
     type Result = SendTxResult;

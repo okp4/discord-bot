@@ -6,7 +6,13 @@ use abscissa_core::{config, Command, FrameworkError, FrameworkErrorKind, Runnabl
 use clap::Parser;
 use tracing::{error, info};
 
-use crate::{discord::client, cli::{prelude::*, config::{DiscordBotConfig, DiscordShardingSection}}};
+use crate::{
+    cli::{
+        config::{DiscordBotConfig, DiscordShardingSection},
+        prelude::*,
+    },
+    discord::client,
+};
 
 #[derive(Command, Debug, Parser)]
 #[clap(arg_required_else_help(true))]

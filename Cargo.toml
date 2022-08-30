@@ -10,10 +10,10 @@ rust-version = "1.63"
 version = "0.1.0"
 
 [dependencies]
-actix = "0.13"
-actix-rt = "2.2"
 abscissa_core = { version = "0.6.0" }
 abscissa_tokio = { version = "0.6.0-pre.2", features = ["actix"] }
+actix = "0.13"
+actix-rt = "2.2"
 bip39 = "1"
 clap = "3"
 cosmos-sdk-proto = "0.14.0"

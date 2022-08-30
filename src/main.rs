@@ -2,7 +2,6 @@
 
 #![deny(warnings, missing_docs, trivial_casts, unused_qualifications)]
 #![forbid(unsafe_code)]
-
 #![deny(
     warnings,
     missing_docs,
@@ -16,8 +15,8 @@
 )]
 
 pub mod cli;
-pub mod discord;
 pub mod cosmos;
+pub mod discord;
 pub mod error;
 
 use crate::cli::prelude::*;

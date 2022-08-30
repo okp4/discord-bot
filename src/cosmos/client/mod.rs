@@ -8,11 +8,10 @@ use tonic::codegen::{Body, Bytes, StdError};
 use tonic::transport::Channel;
 
 pub mod account;
-pub mod error;
-pub mod messages;
-mod handlers;
 mod actor;
-
+pub mod error;
+mod handlers;
+pub mod messages;
 
 /// Hold all necessary client and service for cosmos chain
 #[derive(Debug, Clone)]
