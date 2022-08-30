@@ -1,8 +1,12 @@
-use cosmrs::bank::MsgSend;
-use actix::Message;
+//! Register transaction message
 
+use actix::Message;
+use cosmrs::bank::MsgSend;
+
+/// Result of a register tx message.
 pub type RegisterTxResult = ();
 
+/// Register transaction actor message.
 #[derive(Message)]
 #[rtype(result = "RegisterTxResult")]
 pub struct RegisterTx {

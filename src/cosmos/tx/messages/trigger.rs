@@ -1,7 +1,11 @@
+//! Trigger transaction message
+
 use actix::Message;
 
+/// Trigger transaction actor message result.
 pub type TriggerTxResult = ();
 
+/// Trigger transaction actor message.
 #[derive(Message)]
 #[rtype(result = "TriggerTxResult")]
 pub struct TriggerTx {
@@ -9,5 +13,5 @@ pub struct TriggerTx {
     pub memo: String,
 
     /// gas limit of the transaction.
-    pub gasLimit: u64
+    pub gas_limit: u64,
 }

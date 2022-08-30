@@ -1,2 +1,4 @@
+//! Holds Tx messages definition.
+
 pub mod register;
-mod trigger;
+pub mod trigger;
