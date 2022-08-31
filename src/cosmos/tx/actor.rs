@@ -9,10 +9,10 @@ impl Actor for TxHandler {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         info!("📣 TxHandler started...");
-        ctx.run_interval(Duration::new(8, 0), |_, ctx| {
+        ctx.run_interval(Duration::new(8, 0), |act, ctx| {
             ctx.address().do_send(TriggerTx {
-                memo: "test".to_string(),
-                gas_limit: 200000,
+                memo: act.memo.clone(),
+                gas_limit: act.gas_limit,
             })
         });
     }

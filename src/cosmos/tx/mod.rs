@@ -21,6 +21,10 @@ pub struct TxHandler {
     pub chain_id: String,
     /// Transaction sender .
     pub sender: Account,
+    /// Common memo used for batch transaction
+    pub memo: String,
+    /// Common gas linit used for batch transaction
+    pub gas_limit: u64,
     /// Contains the batch of transaction message to sent.
     pub msgs: Vec<MsgSend>,
     /// GRPC client to send transaction.
