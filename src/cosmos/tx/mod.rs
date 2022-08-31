@@ -10,13 +10,15 @@ use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
 use actix::Addr;
 use cosmrs::auth::BaseAccount;
-use cosmrs::bank::MsgSend;
-use cosmrs::tx::{Body, Fee, SignDoc, SignerInfo};
+use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use tonic::transport::Channel;
 
 /// Actor that will manage all transaction to the cosmos blockchain
 /// Each transaction will be trigger each X seconds.
-pub struct TxHandler {
+pub struct TxHandler<T>
+where
+    T: Msg + Unpin,
+{
     /// Cosmos chain id.
     pub chain_id: String,
     /// Transaction sender .
@@ -25,13 +27,16 @@ pub struct TxHandler {
     pub memo: String,
     /// Common gas linit used for batch transaction
     pub gas_limit: u64,
-    /// Contains the batch of transaction message to sent.
-    pub msgs: Vec<MsgSend>,
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
+    /// Contains the batch of transaction message to sent as prost::Any.
+    msgs: Vec<T>,
 }
 
-impl TxHandler {
+impl<T> TxHandler<T>
+where
+    T: Msg + Unpin + 'static,
+{
     /// Sign a transaction messages.
     pub fn sign_tx(&self, body: &Body, account: BaseAccount, fee: Fee) -> Result<Vec<u8>, Error> {
         let public_key = self.sender.signing_key()?.public_key();

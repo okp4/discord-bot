@@ -1,10 +1,14 @@
 use crate::cosmos::tx::messages::trigger::TriggerTx;
 use crate::cosmos::tx::TxHandler;
 use actix::{Actor, AsyncContext, Context};
+use cosmrs::tx::Msg;
 use std::time::Duration;
 use tracing::info;
 
-impl Actor for TxHandler {
+impl<T> Actor for TxHandler<T>
+where
+    T: Msg + Unpin + 'static,
+{
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
