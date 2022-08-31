@@ -13,3 +13,10 @@ pub struct RegisterTx {
     /// Contains the messages to embed in the transaction.
     pub msg: MsgSend,
 }
+
+impl RegisterTx {
+    /// Create a new RegisterTx.
+    pub fn new(msg: MsgSend) -> Self {
+        Self { msg }
+    }
+}

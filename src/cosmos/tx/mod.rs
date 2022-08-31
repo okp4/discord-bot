@@ -5,8 +5,9 @@ pub mod error;
 pub mod handlers;
 pub mod messages;
 
-use actix::Addr;
+use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
+use actix::Addr;
 use bip39::Mnemonic;
 use cosmrs::auth::BaseAccount;
 use cosmrs::bank::MsgSend;
@@ -14,7 +15,6 @@ use cosmrs::bip32::DerivationPath;
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::tx::{Body, Fee, SignDoc, SignerInfo};
 use tonic::transport::Channel;
-use crate::cosmos::client::Client;
 
 const DERIVATION_PATH: &str = "m/44'/118'/0'/0/0";
 
@@ -28,7 +28,7 @@ pub struct TxHandler {
     /// Contains the batch of transaction message to sent.
     pub msgs: Vec<MsgSend>,
     /// GRPC client to send transaction.
-    pub grpc_client: Addr<Client<Channel>>
+    pub grpc_client: Addr<Client<Channel>>,
 }
 
 impl TxHandler {
