@@ -41,10 +41,7 @@ impl Handler<TriggerTx> for TxHandler {
             payer: None,
             granter: None,
         };
-        match &self
-            .signing_key()
-            .and_then(|key| self.sign_tx(&body, account, key, fee))
-        {
+        match self.sign_tx(&body, account, fee) {
             Ok(_) => info!("🔥 Trigger transaction"),
             Err(why) => error!("❌ Failed sign transaction: {}", why),
         }

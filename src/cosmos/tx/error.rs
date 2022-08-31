@@ -36,3 +36,9 @@ impl From<cosmrs::bip32::Error> for Error {
         Error::Mnemonic(err.to_string())
     }
 }
+
+impl From<crate::cosmos::client::error::Error> for Error {
+    fn from(err: crate::cosmos::client::error::Error) -> Self {
+        Error::Mnemonic(err.to_string())
+    }
+}
