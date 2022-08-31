@@ -11,12 +11,18 @@ impl Handler<BroadcastTx> for Client<Channel> {
     type Result = BroadcastTxResult;
 
     fn handle(&mut self, msg: BroadcastTx, _ctx: &mut Self::Context) -> Self::Result {
-        self.clone()
-            .tx()
-            .broadcast_tx(tonic::Request::new(BroadcastTxRequest {
-                tx_bytes: msg.tx,
-                mode: 2,
-            }));
+        let _ = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap()
+            .block_on(async move {
+                self.clone()
+                    .tx()
+                    .broadcast_tx(tonic::Request::new(BroadcastTxRequest {
+                        tx_bytes: msg.tx,
+                        mode: 2,
+                    }))
+                    .await
+            });
         // TODO: notify discord when the tx is broadcasted
     }
 }

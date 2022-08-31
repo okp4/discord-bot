@@ -27,6 +27,14 @@ pub enum ErrorKind {
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
     SerenityError(String),
+
+    /// Cosmos Error
+    #[error("Cosmos error")]
+    CosmosError(String),
+
+    /// Cosmos client Error
+    #[error("Cosmos client error")]
+    CosmosClientError(String),
 }
 
 impl ErrorKind {
@@ -81,6 +89,20 @@ impl From<io::Error> for Error {
 impl From<SerenityError> for Error {
     fn from(err: SerenityError) -> Self {
         ErrorKind::SerenityError(err.to_string())
+            .context(err)
+            .into()
+    }
+}
+
+impl From<cosmrs::Error> for Error {
+    fn from(err: cosmrs::Error) -> Self {
+        ErrorKind::CosmosError(err.to_string()).context(err).into()
+    }
+}
+
+impl From<crate::cosmos::client::error::Error> for Error {
+    fn from(err: crate::cosmos::client::error::Error) -> Self {
+        ErrorKind::CosmosClientError(err.to_string())
             .context(err)
             .into()
     }

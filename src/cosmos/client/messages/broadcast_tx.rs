@@ -9,5 +9,6 @@ pub type BroadcastTxResult = ();
 #[derive(Message)]
 #[rtype(result = "BroadcastTxResult")]
 pub struct BroadcastTx {
+    /// Transaction to broadcast (binary array)
     pub tx: Vec<u8>,
 }

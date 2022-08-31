@@ -9,6 +9,7 @@ use cosmrs::Error as CosmosError;
 use cosmrs::Error::Crypto;
 use cosmrs::ErrorReport as CosmosErrorReport;
 use thiserror::Error;
+use tonic::Status;
 
 /// Chain errors
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
@@ -40,6 +41,10 @@ pub enum Error {
     /// Client not initialized
     #[error("GRPC client not initialized")]
     NotInitialized,
+
+    /// Request error
+    #[error("Request error : {0}")]
+    Status(String),
 }
 
 impl From<Bip39Error> for Error {
@@ -75,5 +80,11 @@ impl From<EncodeError> for Error {
 impl From<TendermintError> for Error {
     fn from(err: TendermintError) -> Self {
         Error::Tendermint(err.to_string())
+    }
+}
+
+impl From<Status> for Error {
+    fn from(err: Status) -> Self {
+        Error::Status(err.to_string())
     }
 }
