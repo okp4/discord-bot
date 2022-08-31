@@ -7,6 +7,7 @@ use cosmrs::auth::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg};
 use tracing::info;
 use tracing::log::error;
+use crate::cosmos::client::messages::broadcast_tx::BroadcastTx;
 
 impl Handler<TriggerTx> for TxHandler {
     type Result = TriggerTxResult;
@@ -42,11 +43,12 @@ impl Handler<TriggerTx> for TxHandler {
             granter: None,
         };
         match self.sign_tx(&body, account, fee) {
-            Ok(_) => info!("🔥 Trigger transaction"),
+            Ok(tx_bytes) => {
+                info!("🔥 Trigger transaction");
+                self.grpc_client.do_send(BroadcastTx { tx: tx_bytes })
+            },
             Err(why) => error!("❌ Failed sign transaction: {}", why),
         }
-
-        // TODO: Broadcast tx
 
         self.msgs.clear();
     }
