@@ -11,7 +11,7 @@ use crate::{
         config::{DiscordBotConfig, DiscordShardingSection},
         prelude::*,
     },
-    discord::client,
+    discord,
 };
 
 #[derive(Command, Debug, Parser)]
@@ -49,7 +49,7 @@ impl Runnable for StartCmd {
         let config = APP.config();
 
         abscissa_tokio::run(&APP, async {
-            match client::start(
+            match discord::start(
                 &config.discord.token,
                 config.discord.guild_id,
                 config.discord.sharding.shard,
