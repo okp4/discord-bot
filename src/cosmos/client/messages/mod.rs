@@ -1,3 +1,3 @@
 //! Holds actors messages
 
-pub mod send_tx;
+pub mod broadcast_tx;
