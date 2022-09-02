@@ -1,30 +1,31 @@
 //! Holds request commands functions
 
+
 use crate::cli::application::APP;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::error::Error as ChainError;
 use crate::cosmos::client::Client as GRPCClient;
-use crate::discord::cmd::CommandExecutable;
-use crate::discord::error::{Error, ErrorKind};
+use crate::cosmos::faucet::messages::request_funds::RequestFunds;
+use crate::discord_server::Actors;
+use crate::discord_server::cmd::CommandExecutable;
+use crate::discord_server::error::{Error, ErrorKind};
 use abscissa_core::Application;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::{BaseAccount, QueryAccountRequest};
-use cosmos_sdk_proto::cosmos::tx::v1beta1::BroadcastTxRequest;
-use cosmrs::bank::MsgSend;
 use cosmrs::proto::prost;
-use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
+use cosmrs::tx::{Body, Fee, SignDoc, SignerInfo};
 use cosmrs::Error as CosmosError;
-use cosmrs::{AccountId, Coin};
+use cosmrs::AccountId;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
-use serenity::model::application::interaction::{Interaction, InteractionResponseType};
+use serenity::model::application::interaction::Interaction;
 use tonic::transport::Channel;
-use tonic::Status;
 
 /// A command to ask chain to receive token
 pub struct RequestCmd {
     /// Wallet address which will receive token
     pub(crate) address: String,
+    pub actors: Actors,
 }
 
 /// Execute the "ping" command.
@@ -35,74 +36,22 @@ impl CommandExecutable for RequestCmd {
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,
-        grpc_client: &GRPCClient<Channel>,
     ) -> Result<(), Error> {
         let config = &APP.config();
 
-        let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)?;
-
-        let amount = Coin {
-            amount: config.faucet.amount_send as u128,
-            denom: config.chain.denom.parse().unwrap(),
-        };
-
-        let msg_send = MsgSend {
-            from_address: sender.address.clone(),
-            to_address: self.address.parse().map_err(|_| {
+        self.actors.faucet.do_send(RequestFunds{
+            address: self.address.parse().map_err(|_| {
                 Error::from(ErrorKind::Chain(ChainError::Cosmos(
                     CosmosError::AccountId {
                         id: self.address.to_string(),
                     },
                 )))
-            })?,
-            amount: vec![amount.clone()],
-        };
-
-        let gas = config.faucet.gas_limit;
-        let timeout_height = 0u16;
-        let memo = &config.faucet.memo;
-
-        let tx_body = Body::new(vec![msg_send.to_any().unwrap()], memo, timeout_height);
-
-        let tx_signed = sign_tx(
-            grpc_client,
-            &tx_body,
-            sender,
-            Fee::from_amount_and_gas(amount, gas),
-        )
-        .await?;
-
-        let request = tonic::Request::new(BroadcastTxRequest {
-            tx_bytes: tx_signed,
-            mode: 2,
+            })?
         });
 
-        let tx_response = grpc_client
-            .clone()
-            .tx()
-            .broadcast_tx(request)
-            .await
-            .and_then(|resp| {
-                resp.get_ref()
-                    .tx_response
-                    .clone()
-                    .ok_or_else(|| Status::not_found("No transaction response"))
-            })?;
+        Ok(())
 
-        let content = format!(
-            "💵 You will receive {}{}.
-            \t- 🤝 Transaction hash: {}
-            \t- ⚙️ Result code : {}
-            \t- 📝 Raw log : {}
-            \t- ⛽️ Gas used: {}",
-            config.faucet.amount_send,
-            config.chain.denom,
-            tx_response.txhash,
-            tx_response.code,
-            tx_response.raw_log,
-            tx_response.gas_used
-        );
-
+        /*
         command
             .create_interaction_response(&ctx.http, |response| {
                 response
@@ -111,6 +60,7 @@ impl CommandExecutable for RequestCmd {
             })
             .await
             .map_err(Error::from)
+        */
     }
 }
 

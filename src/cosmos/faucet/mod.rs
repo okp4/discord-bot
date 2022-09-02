@@ -2,7 +2,7 @@
 
 mod actor;
 mod handlers;
-mod messages;
+pub mod messages;
 
 use crate::cosmos::client::account::Account;
 use crate::cosmos::tx::TxHandler;

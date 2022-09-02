@@ -1,20 +1,23 @@
 //! Holds Discord library.
 use crate::cosmos::client::error::Error as ChainError;
-use crate::cosmos::client::Client as GRPCClient;
-use crate::discord::cmd::ping::PingCmd;
-use crate::discord::cmd::request::RequestCmd;
-use crate::discord::cmd::CommandExecutable;
-use crate::discord::cmd::DiscordCommand;
-use crate::discord::error::Error as DiscordError;
-use crate::discord::error::ErrorKind::IncorrectArg;
-use crate::discord::error::ErrorKind::MissingArg;
-use crate::discord::error::ErrorKind::UnknownCommand;
-use crate::discord::metrics_discord::{
+use crate::cosmos::faucet::Faucet;
+use crate::cosmos::tx::TxHandler;
+use crate::discord_server::cmd::ping::PingCmd;
+use crate::discord_server::cmd::request::RequestCmd;
+use crate::discord_server::cmd::CommandExecutable;
+use crate::discord_server::cmd::DiscordCommand;
+use crate::discord_server::error::Error as DiscordError;
+use crate::discord_server::error::ErrorKind::IncorrectArg;
+use crate::discord_server::error::ErrorKind::MissingArg;
+use crate::discord_server::error::ErrorKind::UnknownCommand;
+use crate::discord_server::metrics_discord::{
     LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
     METRIC_DISCORD_INTERACTIONS_DURATION, METRIC_DISCORD_INTERACTIONS_TOTAL,
 };
-use crate::discord::utils::interation_name;
+use crate::discord_server::utils::interation_name;
 use crate::error::{Error, ErrorKind};
+use actix::Addr;
+use cosmrs::bank::MsgSend;
 use metrics::{describe_counter, describe_histogram, histogram, increment_counter, Unit};
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
@@ -27,7 +30,6 @@ use std::str::FromStr;
 use std::time::Instant;
 use tonic::transport::Channel;
 
-use crate::cli::prelude::*;
 use tracing::{debug, error, info, warn};
 
 pub mod cmd;
@@ -35,18 +37,24 @@ pub mod error;
 mod metrics_discord;
 pub mod utils;
 
+#[derive(Clone)]
+pub struct Actors {
+    pub tx_handler: Addr<TxHandler<MsgSend>>,
+    pub cosmos_client: Addr<crate::cosmos::client::Client<Channel>>,
+    pub faucet: Addr<Faucet>,
+}
+
 struct Handler {
     guild_id: GuildId,
-    grpc_client: GRPCClient<Channel>,
+    actors: Actors,
 }
 
 impl Handler {
-    async fn new(guild_id: GuildId, grpc_address: String) -> Result<Handler, ChainError> {
-        let grpc_client = GRPCClient::new(grpc_address).await?;
-        Ok(Handler {
-            guild_id,
-            grpc_client,
-        })
+    async fn new(
+        guild_id: GuildId,
+        actors: Actors,
+    ) -> Result<Handler, ChainError> {
+        Ok(Handler { guild_id, actors })
     }
 }
 
@@ -122,9 +130,7 @@ impl EventHandler for Handler {
 
                 let execution_result: Result<(), DiscordError> = match discord_command {
                     Ok(DiscordCommand::Ping) => {
-                        PingCmd {}
-                            .execute(&ctx, &interaction, command, &self.grpc_client)
-                            .await
+                        PingCmd {}.execute(&ctx, &interaction, command).await
                     }
                     Ok(DiscordCommand::Request) => {
                         match command
@@ -144,12 +150,9 @@ impl EventHandler for Handler {
                             .map(|v| v.to_string())
                             .map(|address| {
                                 info!("Request command to address : {}", address);
-                                RequestCmd { address }
+                                RequestCmd { address, actors: self.actors.clone() }
                             }) {
-                            Ok(cmd) => {
-                                cmd.execute(&ctx, &interaction, command, &self.grpc_client)
-                                    .await
-                            }
+                            Ok(cmd) => cmd.execute(&ctx, &interaction, command).await,
                             Err(why) => Err(why),
                         }
                     }
@@ -213,7 +216,13 @@ fn register_metrics() {
 }
 
 /// Start the discord bot (given a token)
-pub async fn start(token: &str, guild_id: u64, shard: u64, shards: u64) -> Result<(), Error> {
+pub async fn start(
+    token: &str,
+    guild_id: u64,
+    shard: u64,
+    shards: u64,
+    actors: Actors,
+) -> Result<(), Error> {
     register_metrics();
 
     let intents = GatewayIntents::empty();
@@ -222,7 +231,7 @@ pub async fn start(token: &str, guild_id: u64, shard: u64, shards: u64) -> Resul
 
     let result = match Handler::new(
         GuildId(guild_id),
-        APP.config().chain.grpc_address.to_string(),
+        actors,
     )
     .await
     {

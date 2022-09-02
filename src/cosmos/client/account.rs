@@ -9,6 +9,7 @@ use cosmrs::AccountId;
 const DERIVATION_PATH: &str = "m/44'/118'/0'/0/0";
 
 /// Client to request cosmos blockchain for the faucet purpose
+#[derive(Clone)]
 pub struct Account {
     /// Address of the faucet sender account.
     pub address: AccountId,

@@ -1,7 +1,7 @@
 //! Main entry point for DiscordBot
 
-#![deny(warnings, missing_docs, trivial_casts, unused_qualifications)]
 #![forbid(unsafe_code)]
+/*
 #![deny(
     warnings,
     missing_docs,
@@ -13,10 +13,11 @@
     unused_qualifications,
     unused_qualifications
 )]
+*/
 
 pub mod cli;
 pub mod cosmos;
-pub mod discord;
+pub mod discord_server;
 pub mod error;
 
 use crate::cli::prelude::*;

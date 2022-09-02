@@ -3,7 +3,9 @@ use std::net::SocketAddr;
 use std::process;
 
 use abscissa_core::{config, Command, FrameworkError, FrameworkErrorKind, Runnable};
+use actix::Actor;
 use clap::Parser;
+use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
 use crate::{
@@ -11,7 +13,12 @@ use crate::{
         config::{DiscordBotConfig, DiscordShardingSection},
         prelude::*,
     },
-    discord,
+    cosmos::{
+        client::{account::Account, Client},
+        faucet::Faucet,
+        tx::TxHandler,
+    },
+    discord_server,
 };
 
 #[derive(Command, Debug, Parser)]
@@ -49,11 +56,47 @@ impl Runnable for StartCmd {
         let config = APP.config();
 
         abscissa_tokio::run(&APP, async {
-            match discord::start(
+            let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
+                .expect("💀 Cannot create faucet account");
+
+            let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
+                .await
+                .map_err(|err| {
+                    error!("💀 Cosmos GRPC client error: {:?}", err);
+                })
+                .unwrap()
+                .start();
+
+            let addr_tx_handler = TxHandler::<MsgSend> {
+                chain_id: config.chain.chain_id.to_string(),
+                sender: sender.clone(),
+                memo: config.faucet.memo.to_string(),
+                gas_limit: config.faucet.gas_limit,
+                grpc_client: addr_cosmos_client.clone(),
+                msgs: Vec::<MsgSend>::new(),
+            }
+            .start();
+
+            let addr_faucet = Faucet {
+                sender: sender.clone(),
+                amount: Coin {
+                    amount: config.faucet.amount_send as u128,
+                    denom: config.chain.denom.parse().unwrap(),
+                },
+                tx_handler: addr_tx_handler.clone(),
+            }
+            .start();
+
+            match discord_server::start(
                 &config.discord.token,
                 config.discord.guild_id,
                 config.discord.sharding.shard,
                 config.discord.sharding.shards,
+                discord_server::Actors {
+                    tx_handler: addr_tx_handler.clone(),
+                    cosmos_client: addr_cosmos_client.clone(),
+                    faucet: addr_faucet,
+                },
             )
             .await
             {

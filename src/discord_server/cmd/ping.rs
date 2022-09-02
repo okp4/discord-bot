@@ -1,12 +1,10 @@
 //! Hold the ping command functions
-use crate::cosmos::client::Client as GRPCClient;
-use crate::discord::cmd::CommandExecutable;
-use crate::discord::error::Error;
+use crate::discord_server::cmd::CommandExecutable;
+use crate::discord_server::error::Error;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
 use serenity::model::application::interaction::{Interaction, InteractionResponseType};
-use tonic::transport::Channel;
 
 /// A command to send a ping request
 pub struct PingCmd {}
@@ -19,7 +17,6 @@ impl CommandExecutable for PingCmd {
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,
-        _: &GRPCClient<Channel>,
     ) -> Result<(), Error> {
         command
             .create_interaction_response(&ctx.http, |response| {

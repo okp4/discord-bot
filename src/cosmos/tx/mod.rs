@@ -30,7 +30,7 @@ where
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
     /// Contains the batch of transaction message to sent as prost::Any.
-    msgs: Vec<T>,
+    pub msgs: Vec<T>,
 }
 
 impl<T> TxHandler<T>
