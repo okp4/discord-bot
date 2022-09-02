@@ -9,7 +9,7 @@ use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
 use actix::Addr;
-use cosmrs::auth::BaseAccount;
+use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use tonic::transport::Channel;
 

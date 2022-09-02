@@ -17,6 +17,10 @@ pub enum Error {
     /// Failed parse mnemonic to private key.
     #[error("Failed parse mnemonic to private key: {0}")]
     Mnemonic(String),
+
+    /// Failed to retrieve base account or account not found
+    #[error("Failed retrieve base account")]
+    AccountNotFound,
 }
 
 impl From<CosmosErrorReport> for Error {

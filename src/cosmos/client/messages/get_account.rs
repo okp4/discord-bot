@@ -3,7 +3,7 @@
 use actix::Message;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 
-use crate::error::Error;
+use crate::cosmos::client::error::Error;
 
 /// Result of a get account request
 pub type GetAccountResult = Result<BaseAccount, Error>;
