@@ -37,10 +37,14 @@ pub mod error;
 mod metrics_discord;
 pub mod utils;
 
+/// Struct that contains actor addresses
 #[derive(Clone)]
 pub struct Actors {
+    /// Cosmos transaction handler actor address
     pub tx_handler: Addr<TxHandler<MsgSend>>,
+    /// Cosmos client actor address
     pub cosmos_client: Addr<crate::cosmos::client::Client<Channel>>,
+    /// Cosmos faucet actor address
     pub faucet: Addr<Faucet>,
 }
 
@@ -50,10 +54,7 @@ struct Handler {
 }
 
 impl Handler {
-    async fn new(
-        guild_id: GuildId,
-        actors: Actors,
-    ) -> Result<Handler, ChainError> {
+    async fn new(guild_id: GuildId, actors: Actors) -> Result<Handler, ChainError> {
         Ok(Handler { guild_id, actors })
     }
 }
@@ -150,7 +151,10 @@ impl EventHandler for Handler {
                             .map(|v| v.to_string())
                             .map(|address| {
                                 info!("Request command to address : {}", address);
-                                RequestCmd { address, actors: self.actors.clone() }
+                                RequestCmd {
+                                    address,
+                                    actors: self.actors.clone(),
+                                }
                             }) {
                             Ok(cmd) => cmd.execute(&ctx, &interaction, command).await,
                             Err(why) => Err(why),
@@ -229,12 +233,7 @@ pub async fn start(
 
     info!("🪐 Start connection to cosmos grpc endpoint");
 
-    let result = match Handler::new(
-        GuildId(guild_id),
-        actors,
-    )
-    .await
-    {
+    let result = match Handler::new(GuildId(guild_id), actors).await {
         Ok(handler) => {
             info!("🛰 Connection to cosmos grpc endpoint successful");
             info!("🚀 Booting the Bot...");

@@ -55,7 +55,7 @@ impl Runnable for StartCmd {
     fn run(&self) {
         let config = APP.config();
 
-        abscissa_tokio::run(&APP, async {
+        abscissa_tokio::run_with_actix(&APP, async {
             let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
                 .expect("💀 Cannot create faucet account");
 

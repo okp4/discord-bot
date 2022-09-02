@@ -1,7 +1,6 @@
 //! Main entry point for DiscordBot
 
 #![forbid(unsafe_code)]
-/*
 #![deny(
     warnings,
     missing_docs,
@@ -13,7 +12,6 @@
     unused_qualifications,
     unused_qualifications
 )]
-*/
 
 pub mod cli;
 pub mod cosmos;
