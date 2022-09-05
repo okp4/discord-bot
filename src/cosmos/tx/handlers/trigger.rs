@@ -7,7 +7,6 @@ use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
 use actix::{ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Fee, Msg};
-use cosmrs::Coin;
 use tracing::info;
 use tracing::log::error;
 
@@ -35,7 +34,7 @@ where
                         addr: sender_address,
                     })
                     .await;
-                return (result, msg);
+                (result, msg)
             }
             .into_actor(self)
             .map(move |(res, message), act, _| {
@@ -52,10 +51,7 @@ where
                     .and_then(|value| value.map_err(|_| AccountNotFound))
                     .and_then(|account| {
                         let fee = Fee {
-                            amount: vec![Coin {
-                                denom: "uknow".parse().unwrap(),
-                                amount: 0,
-                            }], // TODO: Get this from config.
+                            amount: vec![act.fee_amount.clone()],
                             gas_limit: message.gas_limit.into(),
                             payer: None,
                             granter: None,

@@ -11,6 +11,7 @@ use crate::cosmos::tx::error::Error;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
+use cosmrs::Coin;
 use tonic::transport::Channel;
 
 /// Actor that will manage all transaction to the cosmos blockchain
@@ -27,6 +28,8 @@ where
     pub memo: String,
     /// Common gas linit used for batch transaction
     pub gas_limit: u64,
+    /// Common fee amount used for batch transaction
+    pub fee_amount: Coin,
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
     /// Contains the batch of transaction message to sent as prost::Any.

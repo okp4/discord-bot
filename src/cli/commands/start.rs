@@ -72,6 +72,10 @@ impl Runnable for StartCmd {
                 sender: sender.clone(),
                 memo: config.faucet.memo.to_string(),
                 gas_limit: config.faucet.gas_limit,
+                fee_amount: Coin {
+                    denom: config.chain.denom.parse().unwrap(),
+                    amount: config.faucet.fee_amount as u128,
+                },
                 grpc_client: addr_cosmos_client.clone(),
                 msgs: Vec::<MsgSend>::new(),
             }
