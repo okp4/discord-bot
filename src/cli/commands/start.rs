@@ -77,6 +77,7 @@ impl Runnable for StartCmd {
                     amount: config.faucet.fee_amount as u128,
                 },
                 addr_cosmos_client.clone(),
+                config.chain.batch_transaction_window,
             )
             .start();
 

@@ -13,6 +13,7 @@ use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use cosmrs::Coin;
 use serenity::model::user::User;
+use std::time::Duration;
 use tonic::transport::Channel;
 
 /// Actor that will manage all transaction to the cosmos blockchain
@@ -33,6 +34,8 @@ where
     pub fee_amount: Coin,
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
+    /// Duration between two transactions.
+    pub batch_window: Duration,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs: Vec<T>,
     /// Contains the list of all user that request transaction.
@@ -51,6 +54,7 @@ where
         gas_limit: u64,
         fee_amount: Coin,
         grpc_client: Addr<Client<Channel>>,
+        batch_window: Duration,
     ) -> TxHandler<T> {
         Self {
             chain_id,
@@ -59,6 +63,7 @@ where
             gas_limit,
             fee_amount,
             grpc_client,
+            batch_window,
             msgs: vec![],
             subscribers: vec![],
         }

@@ -86,7 +86,7 @@ impl Default for MetricsSection {
 
 /// Chain configuration section
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct ChainSection {
     /// The chain okp4 server url.
     pub grpc_address: String,
@@ -99,6 +99,9 @@ pub struct ChainSection {
 
     /// Address prefix.
     pub prefix: String,
+
+    /// Duration between two transaction batch.
+    pub batch_transaction_window: Duration,
 }
 
 impl Default for ChainSection {
@@ -108,6 +111,7 @@ impl Default for ChainSection {
             chain_id: "localnet-okp4-1".to_string(),
             denom: "know".to_string(),
             prefix: "okp4".to_string(),
+            batch_transaction_window: Duration::from_secs(8),
         }
     }
 }
