@@ -67,18 +67,17 @@ impl Runnable for StartCmd {
                 .unwrap()
                 .start();
 
-            let addr_tx_handler = TxHandler::<MsgSend> {
-                chain_id: config.chain.chain_id.to_string(),
-                sender: sender.clone(),
-                memo: config.faucet.memo.to_string(),
-                gas_limit: config.faucet.gas_limit,
-                fee_amount: Coin {
+            let addr_tx_handler = TxHandler::<MsgSend>::new(
+                config.chain.chain_id.to_string(),
+                sender.clone(),
+                config.faucet.memo.to_string(),
+                config.faucet.gas_limit,
+                Coin {
                     denom: config.chain.denom.parse().unwrap(),
                     amount: config.faucet.fee_amount as u128,
                 },
-                grpc_client: addr_cosmos_client.clone(),
-                msgs: Vec::<MsgSend>::new(),
-            }
+                addr_cosmos_client.clone(),
+            )
             .start();
 
             let addr_faucet = Faucet {

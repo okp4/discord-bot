@@ -2,6 +2,7 @@
 
 use actix::Message;
 use cosmrs::tx::Msg;
+use serenity::model::user::User;
 
 /// Result of a register tx message.
 pub type RegisterTxResult = ();
@@ -14,7 +15,10 @@ where
     T: Msg,
 {
     /// Contains the messages to embed in the transaction.
-    pub msg: T,
+    pub(crate) msg: T,
+
+    /// Transaction subscriber
+    pub(crate) subscriber: Option<User>,
 }
 
 impl<T> RegisterTx<T>
@@ -22,10 +26,10 @@ where
     T: Msg,
 {
     /// Create a new RegisterTx.
-    pub fn new(msg: T) -> Self
+    pub fn new(msg: T, subscriber: Option<User>) -> Self
     where
         T: Msg,
     {
-        Self { msg }
+        Self { msg, subscriber }
     }
 }

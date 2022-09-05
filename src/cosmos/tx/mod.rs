@@ -12,6 +12,7 @@ use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use cosmrs::Coin;
+use serenity::model::user::User;
 use tonic::transport::Channel;
 
 /// Actor that will manage all transaction to the cosmos blockchain
@@ -33,13 +34,36 @@ where
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
     /// Contains the batch of transaction message to sent as prost::Any.
-    pub msgs: Vec<T>,
+    msgs: Vec<T>,
+    /// Contains the list of all user that request transaction.
+    subscribers: Vec<User>,
 }
 
 impl<T> TxHandler<T>
 where
     T: Msg + Unpin + 'static,
 {
+    /// Create a new TxHandler for a specific message type.
+    pub fn new(
+        chain_id: String,
+        sender: Account,
+        memo: String,
+        gas_limit: u64,
+        fee_amount: Coin,
+        grpc_client: Addr<Client<Channel>>,
+    ) -> TxHandler<T> {
+        Self {
+            chain_id,
+            sender,
+            memo,
+            gas_limit,
+            fee_amount,
+            grpc_client,
+            msgs: vec![],
+            subscribers: vec![],
+        }
+    }
+
     /// Sign a transaction messages.
     pub fn sign_tx(&self, body: &Body, account: BaseAccount, fee: Fee) -> Result<Vec<u8>, Error> {
         let public_key = self.sender.signing_key()?.public_key();

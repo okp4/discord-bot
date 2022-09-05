@@ -38,6 +38,7 @@ impl CommandExecutable for RequestCmd {
                     },
                 )))
             })?,
+            requester: command.user.clone(),
         });
 
         command
@@ -47,7 +48,7 @@ impl CommandExecutable for RequestCmd {
                     .interaction_response_data(|message| {
                         message
                             .ephemeral(true)
-                            .content(format!("📥 Funds has been successfully requested."))
+                            .content("📥 Funds has been successfully requested.".to_string())
                     })
             })
             .await

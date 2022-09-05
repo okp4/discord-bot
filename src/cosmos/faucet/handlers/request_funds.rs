@@ -15,7 +15,8 @@ impl Handler<RequestFunds> for Faucet {
             amount: vec![self.amount.clone()],
         };
 
-        self.tx_handler.do_send(RegisterTx::new(msg_send));
+        self.tx_handler
+            .do_send(RegisterTx::new(msg_send, Some(msg.requester)));
 
         info!("✍️  Register request funds for {}", msg.address);
     }
