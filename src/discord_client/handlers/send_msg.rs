@@ -1,5 +1,5 @@
 use actix::{ContextFutureSpawner, Handler, WrapFuture};
-use serenity::{http::Http, json::Value};
+use serenity::{http::Http, model::id::ChannelId};
 use tracing::log::{info, warn};
 
 use crate::discord_client::{
@@ -11,7 +11,7 @@ impl Handler<SendMessage> for DiscordActor {
     type Result = SendMessageResult;
 
     fn handle(&mut self, msg: SendMessage, ctx: &mut Self::Context) -> Self::Result {
-        let discord_client = Http::new(&self.token);
+        let http = Http::new(&self.token);
 
         async move {
             info!(
@@ -19,17 +19,24 @@ impl Handler<SendMessage> for DiscordActor {
                 msg.content.clone(),
                 msg.channel_id
             );
-            let _ = discord_client
-                .send_message(msg.channel_id, &Value::String(msg.content.clone()))
+            let _ = ChannelId(msg.channel_id)
+                .send_message(&http, |m| {
+                    m.content(msg.content).tts(true);
+                    if !msg.title.is_empty() || !msg.description.is_empty() {
+                        m.embed(|e| {
+                            if !msg.title.is_empty() {
+                                e.title(msg.title);
+                            }
+                            if !msg.description.is_empty() {
+                                e.description(msg.description);
+                            }
+                            e
+                        });
+                    }
+                    m
+                })
                 .await
-                .map_err(|err| {
-                    warn!(
-                        "Cannot send message {} to channel with ID {}: {:?}",
-                        msg.content.clone(),
-                        msg.channel_id,
-                        err
-                    )
-                });
+                .map_err(|err| warn!("Cannot send message: {:?}", err));
         }
         .into_actor(self)
         .wait(ctx);

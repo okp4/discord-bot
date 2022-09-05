@@ -2,7 +2,6 @@
 use crate::cosmos::client::error::Error as ChainError;
 use crate::cosmos::faucet::Faucet;
 use crate::cosmos::tx::TxHandler;
-use crate::discord_client::DiscordActor;
 use crate::discord_server::cmd::ping::PingCmd;
 use crate::discord_server::cmd::request::RequestCmd;
 use crate::discord_server::cmd::CommandExecutable;
@@ -47,8 +46,6 @@ pub struct Actors {
     pub cosmos_client: Addr<crate::cosmos::client::Client<Channel>>,
     /// Cosmos faucet actor address
     pub faucet: Addr<Faucet>,
-    /// Discord client actor address
-    pub discord_client: Addr<DiscordActor>,
 }
 
 struct Handler {

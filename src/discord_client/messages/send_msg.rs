@@ -9,7 +9,11 @@ pub type SendMessageResult = ();
 #[derive(Message)]
 #[rtype(result = "SendMessageResult")]
 pub struct SendMessage {
-    /// Message to send
+    /// Title of the embedded message - optional
+    pub title: String,
+    /// Description of the embedded message - optional
+    pub description: String,
+    /// Content of the message body - optional
     pub content: String,
     /// Channel to send into
     pub channel_id: u64,

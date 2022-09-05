@@ -60,6 +60,8 @@ impl Runnable for StartCmd {
             let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
                 .expect("💀 Cannot create faucet account");
 
+            let _addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
+
             let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
                 .await
                 .map_err(|err| {
@@ -92,8 +94,6 @@ impl Runnable for StartCmd {
             }
             .start();
 
-            let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
-
             match discord_server::start(
                 &config.discord.token,
                 config.discord.guild_id,
@@ -103,7 +103,6 @@ impl Runnable for StartCmd {
                     tx_handler: addr_tx_handler.clone(),
                     cosmos_client: addr_cosmos_client.clone(),
                     faucet: addr_faucet,
-                    discord_client: addr_discord_client,
                 },
             )
             .await
