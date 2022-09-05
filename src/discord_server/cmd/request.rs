@@ -9,7 +9,7 @@ use cosmrs::Error as CosmosError;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
-use serenity::model::application::interaction::Interaction;
+use serenity::model::application::interaction::{Interaction, InteractionResponseType};
 use tracing::info;
 
 /// A command to ask chain to receive token
@@ -25,9 +25,9 @@ pub struct RequestCmd {
 impl CommandExecutable for RequestCmd {
     async fn execute(
         &self,
-        _ctx: &Context,
+        ctx: &Context,
         _: &Interaction,
-        _command: &ApplicationCommandInteraction,
+        command: &ApplicationCommandInteraction,
     ) -> Result<(), Error> {
         info!("💰 request fund slash command");
         self.actors.faucet.do_send(RequestFunds {
@@ -40,17 +40,17 @@ impl CommandExecutable for RequestCmd {
             })?,
         });
 
-        Ok(())
-
-        /*
         command
             .create_interaction_response(&ctx.http, |response| {
                 response
                     .kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|message| message.content(content))
+                    .interaction_response_data(|message| {
+                        message
+                            .ephemeral(true)
+                            .content(format!("📥 Funds has been successfully requested."))
+                    })
             })
             .await
             .map_err(Error::from)
-        */
     }
 }
