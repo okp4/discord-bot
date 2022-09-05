@@ -60,15 +60,18 @@ impl Runnable for StartCmd {
             let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
                 .expect("💀 Cannot create faucet account");
 
-            let _addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
+            let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
 
-            let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
-                .await
-                .map_err(|err| {
-                    error!("💀 Cosmos GRPC client error: {:?}", err);
-                })
-                .unwrap()
-                .start();
+            let addr_cosmos_client = Client::new(
+                APP.config().chain.grpc_address.to_string(),
+                addr_discord_client.clone(),
+            )
+            .await
+            .map_err(|err| {
+                error!("💀 Cosmos GRPC client error: {:?}", err);
+            })
+            .unwrap()
+            .start();
 
             let addr_tx_handler = TxHandler::<MsgSend>::new(
                 config.chain.chain_id.to_string(),

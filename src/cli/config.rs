@@ -134,6 +134,9 @@ pub struct FaucetSection {
 
     /// Gas limit
     pub gas_limit: u64,
+
+    /// Discord channel ID used for transactions feedback
+    pub channel_id: u64,
 }
 
 impl Default for FaucetSection {
@@ -144,6 +147,7 @@ impl Default for FaucetSection {
             amount_send: 1,
             memo: "Sent by økp4 discord bot".to_string(),
             gas_limit: 200000,
+            channel_id: 123456789123,
         }
     }
 }

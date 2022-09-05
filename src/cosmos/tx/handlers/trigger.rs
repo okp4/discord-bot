@@ -23,7 +23,9 @@ where
         }
 
         let msgs = self.msgs.clone();
+        let subscribers = self.subscribers.clone();
         self.msgs.clear();
+        self.subscribers.clear();
 
         let grpc_client = self.grpc_client.clone();
         let sender_address = self.sender.address.to_string();
@@ -60,7 +62,10 @@ where
                     }) {
                     Ok(tx_bytes) => {
                         info!("🔥 Trigger transaction");
-                        act.grpc_client.do_send(BroadcastTx { tx: tx_bytes })
+                        act.grpc_client.do_send(BroadcastTx {
+                            tx: tx_bytes,
+                            subscribers,
+                        })
                     }
                     Err(why) => error!("❌ Failed sign transaction: {}", why),
                 }
