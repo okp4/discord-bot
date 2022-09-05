@@ -16,8 +16,6 @@ use tracing::info;
 pub struct RequestCmd {
     /// Wallet address which will receive token
     pub(crate) address: String,
-    /// Actors addresses
-    pub actors: Actors,
 }
 
 /// Execute the "ping" command.
@@ -28,9 +26,10 @@ impl CommandExecutable for RequestCmd {
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,
+        actors: &Actors,
     ) -> Result<(), Error> {
         info!("💰 request fund slash command");
-        self.actors.faucet.do_send(RequestFunds {
+        actors.faucet.do_send(RequestFunds {
             address: self.address.parse().map_err(|_| {
                 Error::from(ErrorKind::Chain(ChainError::Cosmos(
                     CosmosError::AccountId {

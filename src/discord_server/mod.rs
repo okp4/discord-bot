@@ -131,7 +131,9 @@ impl EventHandler for Handler {
 
                 let execution_result: Result<(), DiscordError> = match discord_command {
                     Ok(DiscordCommand::Ping) => {
-                        PingCmd {}.execute(&ctx, &interaction, command).await
+                        PingCmd {}
+                            .execute(&ctx, &interaction, command, &self.actors)
+                            .await
                     }
                     Ok(DiscordCommand::Request) => {
                         match command
@@ -151,12 +153,9 @@ impl EventHandler for Handler {
                             .map(|v| v.to_string())
                             .map(|address| {
                                 info!("Request command to address : {}", address);
-                                RequestCmd {
-                                    address,
-                                    actors: self.actors.clone(),
-                                }
+                                RequestCmd { address }
                             }) {
-                            Ok(cmd) => cmd.execute(&ctx, &interaction, command).await,
+                            Ok(cmd) => cmd.execute(&ctx, &interaction, command, &self.actors).await,
                             Err(why) => Err(why),
                         }
                     }

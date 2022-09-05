@@ -1,6 +1,7 @@
 //! Hold the ping command functions
 use crate::discord_server::cmd::CommandExecutable;
 use crate::discord_server::error::Error;
+use crate::discord_server::Actors;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
@@ -17,6 +18,7 @@ impl CommandExecutable for PingCmd {
         ctx: &Context,
         _: &Interaction,
         command: &ApplicationCommandInteraction,
+        _: &Actors,
     ) -> Result<(), Error> {
         command
             .create_interaction_response(&ctx.http, |response| {

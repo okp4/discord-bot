@@ -4,6 +4,7 @@ pub mod ping;
 pub mod request;
 
 use crate::discord_server::error::Error;
+use crate::discord_server::Actors;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;
@@ -20,6 +21,7 @@ pub trait CommandExecutable {
         _: &Context,
         _: &Interaction,
         _: &ApplicationCommandInteraction,
+        _: &Actors,
     ) -> Result<(), Error>;
 }
 /// The different supported commands.
