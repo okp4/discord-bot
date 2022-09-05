@@ -18,6 +18,7 @@ use crate::{
         faucet::Faucet,
         tx::TxHandler,
     },
+    discord_client::DiscordActor,
     discord_server,
 };
 
@@ -91,6 +92,8 @@ impl Runnable for StartCmd {
             }
             .start();
 
+            let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
+
             match discord_server::start(
                 &config.discord.token,
                 config.discord.guild_id,
@@ -100,6 +103,7 @@ impl Runnable for StartCmd {
                     tx_handler: addr_tx_handler.clone(),
                     cosmos_client: addr_cosmos_client.clone(),
                     faucet: addr_faucet,
+                    discord_client: addr_discord_client,
                 },
             )
             .await
