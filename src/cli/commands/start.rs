@@ -62,16 +62,13 @@ impl Runnable for StartCmd {
 
             let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
 
-            let addr_cosmos_client = Client::new(
-                APP.config().chain.grpc_address.to_string(),
-                addr_discord_client.clone(),
-            )
-            .await
-            .map_err(|err| {
-                error!("💀 Cosmos GRPC client error: {:?}", err);
-            })
-            .unwrap()
-            .start();
+            let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
+                .await
+                .map_err(|err| {
+                    error!("💀 Cosmos GRPC client error: {:?}", err);
+                })
+                .unwrap()
+                .start();
 
             let addr_tx_handler = TxHandler::<MsgSend>::new(
                 config.chain.chain_id.to_string(),
@@ -84,6 +81,7 @@ impl Runnable for StartCmd {
                 },
                 addr_cosmos_client.clone(),
                 config.chain.batch_transaction_window,
+                addr_discord_client.clone(),
             )
             .start();
 

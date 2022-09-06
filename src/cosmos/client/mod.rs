@@ -1,7 +1,5 @@
 //! Holds CosmosClient library.
 
-use crate::discord_client::DiscordActor;
-use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use error::Error;
@@ -19,7 +17,6 @@ pub mod messages;
 #[derive(Debug, Clone)]
 pub struct Client<T> {
     channel: Box<T>,
-    addr_discord_client: Addr<DiscordActor>,
 }
 
 impl<T> Client<T>
@@ -42,10 +39,7 @@ where
 
 impl Client<Channel> {
     /// Create a new client form a GRPC endpoint
-    pub async fn new<D>(
-        endpoint: D,
-        addr_discord_client: Addr<DiscordActor>,
-    ) -> Result<Client<Channel>, Error>
+    pub async fn new<D>(endpoint: D) -> Result<Client<Channel>, Error>
     where
         D: TryInto<tonic::transport::Endpoint>,
         D::Error: Into<StdError>,
@@ -56,7 +50,6 @@ impl Client<Channel> {
             .await
             .map(|channel| Client {
                 channel: Box::new(channel),
-                addr_discord_client,
             })
             .map_err(|err| Error::Connection(err.to_string()))
     }

@@ -8,6 +8,7 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
+use crate::discord_client::DiscordActor;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
@@ -40,6 +41,8 @@ where
     msgs: Vec<T>,
     /// Contains the list of all user that request transaction.
     subscribers: Vec<User>,
+    /// Address of the Discord client Actor
+    addr_discord_client: Addr<DiscordActor>,
 }
 
 impl<T> TxHandler<T>
@@ -55,6 +58,7 @@ where
         fee_amount: Coin,
         grpc_client: Addr<Client<Channel>>,
         batch_window: Duration,
+        addr_discord_client: Addr<DiscordActor>,
     ) -> TxHandler<T> {
         Self {
             chain_id,
@@ -66,6 +70,7 @@ where
             batch_window,
             msgs: vec![],
             subscribers: vec![],
+            addr_discord_client,
         }
     }
 
