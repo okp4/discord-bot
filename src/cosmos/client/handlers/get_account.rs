@@ -4,8 +4,8 @@ use cosmos_sdk_proto::cosmos::auth::v1beta1::QueryAccountRequest;
 use cosmrs::Error as CosmosError;
 use tonic::transport::Channel;
 
+use crate::cosmos::client::error::Error;
 use crate::cosmos::client::{
-    error::Error,
     messages::get_account::{GetAccount, GetAccountResult},
     Client,
 };

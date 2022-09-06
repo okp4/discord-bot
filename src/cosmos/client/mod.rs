@@ -1,10 +1,10 @@
 //! Holds CosmosClient library.
 
-use crate::cosmos::client::error::Error;
 use crate::discord_client::DiscordActor;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
+use error::Error;
 use std::fmt::Debug;
 use tonic::codegen::{Body, Bytes, StdError};
 use tonic::transport::Channel;

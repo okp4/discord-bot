@@ -2,7 +2,7 @@
 
 use crate::cosmos::client::messages::broadcast_tx::BroadcastTx;
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
-use crate::cosmos::tx::error::Error::AccountNotFound;
+use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
 use actix::{ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
@@ -49,8 +49,8 @@ where
                 );
 
                 match res
-                    .map_err(|_| AccountNotFound)
-                    .and_then(|value| value.map_err(|_| AccountNotFound))
+                    .map_err(Error::from)
+                    .and_then(|value| value.map_err(Error::from))
                     .and_then(|account| {
                         let fee = Fee {
                             amount: vec![act.fee_amount.clone()],

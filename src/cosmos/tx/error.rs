@@ -1,5 +1,6 @@
 //! All errors from the TxHandler actor.
 
+use actix::MailboxError;
 use cosmrs::ErrorReport as CosmosErrorReport;
 use thiserror::Error;
 
@@ -14,13 +15,13 @@ pub enum Error {
     #[error("Failed sign transaction: {0}")]
     SignTx(String),
 
-    /// Failed parse mnemonic to private key.
-    #[error("Failed parse mnemonic to private key: {0}")]
-    Mnemonic(String),
-
     /// Failed to retrieve base account or account not found
-    #[error("Failed retrieve base account")]
-    AccountNotFound,
+    #[error("An error occur at the grpc client: {0}")]
+    Client(crate::cosmos::client::error::Error),
+
+    /// Failed communicate to actix.
+    #[error("An error occurs when send message to actix: {0}.")]
+    Mailbox(String),
 }
 
 impl From<CosmosErrorReport> for Error {
@@ -29,20 +30,14 @@ impl From<CosmosErrorReport> for Error {
     }
 }
 
-impl From<bip39::Error> for Error {
-    fn from(err: bip39::Error) -> Self {
-        Error::Mnemonic(err.to_string())
-    }
-}
-
-impl From<cosmrs::bip32::Error> for Error {
-    fn from(err: cosmrs::bip32::Error) -> Self {
-        Error::Mnemonic(err.to_string())
-    }
-}
-
 impl From<crate::cosmos::client::error::Error> for Error {
     fn from(err: crate::cosmos::client::error::Error) -> Self {
-        Error::Mnemonic(err.to_string())
+        Error::Client(err)
+    }
+}
+
+impl From<MailboxError> for Error {
+    fn from(err: MailboxError) -> Self {
+        Error::Mailbox(err.to_string())
     }
 }

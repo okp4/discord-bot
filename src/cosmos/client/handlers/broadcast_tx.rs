@@ -36,24 +36,22 @@ impl Handler<BroadcastTx> for Client<Channel> {
                         err.code(),
                         err.message()
                     );
+                    err
                 })
                 .and_then(|res| {
-                    let tx_response = res
-                        .get_ref()
+                    res.get_ref()
                         .tx_response
                         .clone()
                         .ok_or_else(|| Status::not_found("No transaction response"))
-                        .unwrap();
-
+                })
+                .and_then(|tx_response| {
                     discord_client.do_send(SendMessage {
                         title: String::from("🚀 Transaction broadcasted!"),
                         description: format!(
                             "\t- 🤝 Transaction hash: {}
                             \t- ⚙️ Result code : {}
                             \t- ⛽️ Gas used: {}",
-                            tx_response.txhash,
-                            tx_response.code,
-                            tx_response.gas_used
+                            tx_response.txhash, tx_response.code, tx_response.gas_used
                         ),
                         content: {
                             let mut str = String::new();
