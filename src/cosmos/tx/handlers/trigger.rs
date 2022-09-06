@@ -35,7 +35,7 @@ where
         let grpc_client = self.grpc_client.clone();
         let second_grpc_client = self.grpc_client.clone(); // TODO: remove this 💩
         let sender_address = self.sender.address.to_string();
-        let discord_client = self.addr_discord_client.clone();
+        let discord_client = self.discord_client.clone();
         Box::pin(
             async move {
                 let result: Result<GetAccountResult, MailboxError> = grpc_client

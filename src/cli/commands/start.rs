@@ -16,7 +16,7 @@ use crate::{
     cosmos::{
         client::{account::Account, Client},
         faucet::Faucet,
-        tx::TxHandler,
+        tx::{Actors, TxHandler},
     },
     discord_client::DiscordActor,
     discord_server,
@@ -79,9 +79,11 @@ impl Runnable for StartCmd {
                     denom: config.chain.denom.parse().unwrap(),
                     amount: config.faucet.fee_amount as u128,
                 },
-                addr_cosmos_client.clone(),
                 config.chain.batch_transaction_window,
-                addr_discord_client.clone(),
+                Actors {
+                    grpc_client: addr_cosmos_client.clone(),
+                    discord_client: addr_discord_client.clone(),
+                },
             )
             .start();
 

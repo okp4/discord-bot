@@ -17,6 +17,14 @@ use serenity::model::user::User;
 use std::time::Duration;
 use tonic::transport::Channel;
 
+/// Contains addresses of actors that will be used by the TxHandler
+pub struct Actors {
+    /// GRPC client to send transaction.
+    pub grpc_client: Addr<Client<Channel>>,
+    /// Address of the Discord client Actor
+    pub discord_client: Addr<DiscordActor>,
+}
+
 /// Actor that will manage all transaction to the cosmos blockchain
 /// Each transaction will be trigger each X seconds.
 pub struct TxHandler<T>
@@ -33,16 +41,16 @@ where
     pub gas_limit: u64,
     /// Common fee amount used for batch transaction
     pub fee_amount: Coin,
-    /// GRPC client to send transaction.
-    pub grpc_client: Addr<Client<Channel>>,
     /// Duration between two transactions.
     pub batch_window: Duration,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs: Vec<T>,
     /// Contains the list of all user that request transaction.
     subscribers: Vec<User>,
+    /// GRPC client to send transaction.
+    grpc_client: Addr<Client<Channel>>,
     /// Address of the Discord client Actor
-    addr_discord_client: Addr<DiscordActor>,
+    discord_client: Addr<DiscordActor>,
 }
 
 impl<T> TxHandler<T>
@@ -56,9 +64,8 @@ where
         memo: String,
         gas_limit: u64,
         fee_amount: Coin,
-        grpc_client: Addr<Client<Channel>>,
         batch_window: Duration,
-        addr_discord_client: Addr<DiscordActor>,
+        actors: Actors,
     ) -> TxHandler<T> {
         Self {
             chain_id,
@@ -66,11 +73,11 @@ where
             memo,
             gas_limit,
             fee_amount,
-            grpc_client,
             batch_window,
             msgs: vec![],
             subscribers: vec![],
-            addr_discord_client,
+            grpc_client: actors.grpc_client,
+            discord_client: actors.discord_client,
         }
     }
 
