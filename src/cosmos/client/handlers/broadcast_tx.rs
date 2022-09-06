@@ -44,7 +44,7 @@ impl Handler<BroadcastTx> for Client<Channel> {
                         .clone()
                         .ok_or_else(|| Status::not_found("No transaction response"))
                 })
-                .and_then(|tx_response| {
+                .map(|tx_response| {
                     discord_client.do_send(SendMessage {
                         title: String::from("🚀 Transaction broadcasted!"),
                         description: format!(
@@ -63,8 +63,7 @@ impl Handler<BroadcastTx> for Client<Channel> {
                             str
                         },
                         channel_id: config.faucet.channel_id,
-                    });
-                    Ok(())
+                    })
                 });
         }
         .into_actor(self)
