@@ -1,6 +1,6 @@
 //! Trigger transaction handler
 
-use crate::cosmos::client::messages::broadcast_tx::BroadcastTx;
+use crate::cosmos::client::messages::broadcast_tx::{BroadcastTx, BroadcastTxResult};
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
@@ -28,6 +28,7 @@ where
         self.subscribers.clear();
 
         let grpc_client = self.grpc_client.clone();
+        let second_grpc_client = self.grpc_client.clone(); // TODO: remove this 💩
         let sender_address = self.sender.address.to_string();
         Box::pin(
             async move {
@@ -48,8 +49,7 @@ where
                     0u16,
                 );
 
-                match res
-                    .map_err(Error::from)
+                res.map_err(Error::from)
                     .and_then(|value| value.map_err(Error::from))
                     .and_then(|account| {
                         let fee = Fee {
@@ -59,15 +59,37 @@ where
                             granter: None,
                         };
                         act.sign_tx(&body, account, fee)
-                    }) {
-                    Ok(tx_bytes) => {
-                        info!("🔥 Trigger transaction");
-                        act.grpc_client.do_send(BroadcastTx {
-                            tx: tx_bytes,
-                            subscribers,
-                        })
-                    }
-                    Err(why) => error!("❌ Failed sign transaction: {}", why),
+                    })
+            })
+            .then(|sign_tx, act, _| {
+                async move {
+                    let result: Result<BroadcastTxResult, Error> = match sign_tx {
+                        Ok(tx_bytes) => {
+                            info!("🔥 Broadcast transaction");
+                            second_grpc_client
+                                .send(BroadcastTx {
+                                    tx: tx_bytes,
+                                    subscribers,
+                                })
+                                .await
+                                .map_err(Error::from)
+                        }
+                        Err(why) => {
+                            error!("❌ Failed sign transaction: {}", why);
+                            Err(why)
+                        }
+                    };
+                    result
+                }
+                .into_actor(act)
+            })
+            .map(|tx_result, _, _| {
+                match tx_result.and_then(|i| i.map_err(Error::from)) {
+                    Ok(tx_response) => info!(
+                        "Transaction successfuylly broadcasted : {}",
+                        tx_response.txhash
+                    ),
+                    Err(why) => error!("❌ Failed sign transaction {}", why),
                 }
             }),
         )
