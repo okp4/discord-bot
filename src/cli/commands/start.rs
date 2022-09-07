@@ -75,7 +75,7 @@ impl Runnable for StartCmd {
 
             let addr_tx_handler = TxHandler::<MsgSend>::new(
                 config.chain.chain_id.to_string(),
-                sender.clone(),
+                sender.to_owned(),
                 config.faucet.memo.to_string(),
                 Fee {
                     amount: vec![Coin {
