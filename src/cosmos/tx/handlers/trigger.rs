@@ -54,7 +54,8 @@ where
                     0u16,
                 );
 
-                let sign_tx = res.map_err(Error::from)
+                let sign_tx = res
+                    .map_err(Error::from)
                     .and_then(|value| value.map_err(Error::from))
                     .and_then(|account| {
                         let fee = Fee {
