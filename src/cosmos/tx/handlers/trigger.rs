@@ -33,7 +33,6 @@ where
         self.subscribers.clear();
 
         let grpc_client = self.grpc_client.clone();
-        let second_grpc_client = self.grpc_client.clone(); // TODO: remove this 💩
         let sender_address = self.sender.address.to_string();
         let discord_client = self.discord_client.clone();
         Box::pin(
@@ -43,10 +42,10 @@ where
                         addr: sender_address,
                     })
                     .await;
-                (result, msg)
+                (result, msg, grpc_client)
             }
             .into_actor(self)
-            .map(move |(res, message), act, _| {
+            .map(move |(res, message, grpc_client), act, _| {
                 let body = Body::new(
                     msgs.iter()
                         .map(|msg| msg.to_any().unwrap())
@@ -55,7 +54,7 @@ where
                     0u16,
                 );
 
-                res.map_err(Error::from)
+                let sign_tx = res.map_err(Error::from)
                     .and_then(|value| value.map_err(Error::from))
                     .and_then(|account| {
                         let fee = Fee {
@@ -65,14 +64,15 @@ where
                             granter: None,
                         };
                         act.sign_tx(&body, account, fee)
-                    })
+                    });
+                (sign_tx, grpc_client)
             })
-            .then(|sign_tx, act, _| {
+            .then(|(sign_tx, grpc_client), act, _| {
                 async move {
                     let result: Result<BroadcastTxResult, Error> = match sign_tx {
                         Ok(tx_bytes) => {
                             info!("🔥 Broadcast transaction");
-                            second_grpc_client
+                            grpc_client
                                 .send(BroadcastTx { tx: tx_bytes })
                                 .await
                                 .map_err(Error::from)
