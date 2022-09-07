@@ -7,7 +7,7 @@ pub mod messages;
 use crate::cosmos::tx::TxHandler;
 use actix::Addr;
 use cosmrs::bank::MsgSend;
-use cosmrs::{Coin, AccountId};
+use cosmrs::{AccountId, Coin};
 
 /// Represent a faucet actor allowing send defined amount to a recipient.
 pub struct Faucet {
