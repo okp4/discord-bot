@@ -107,7 +107,27 @@ where
                             None => {}
                         };
                     }
-                    Err(why) => error!("❌ Failed sign transaction {}", why),
+                    Err(why) => {
+                        error!("❌ Failed sign transaction {}", why);
+                         match act.channel_id {
+                            Some(channel_id) => discord_client.do_send(SendMessage {
+                                title: String::from("🤷 So sorry, something went wrong"),
+                                description: String::from("You're request was not processed.\nThe transaction was not broadcasted."),
+                                content: {
+                                    let mut str = String::new();
+                                    for sub in subscribers {
+                                        str.push_str(
+                                            &format_args!("{member} ", member = &sub.mention())
+                                                .to_string(),
+                                        );
+                                    }
+                                    str
+                                },
+                                channel_id,
+                            }),
+                            None => {}
+                        };
+                    }
                 }
             }),
         )
