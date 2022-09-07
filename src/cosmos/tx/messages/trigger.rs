@@ -1,6 +1,7 @@
 //! Trigger transaction message
 
 use actix::Message;
+use cosmrs::tx::Fee;
 
 /// Trigger transaction actor message result.
 pub type TriggerTxResult = ();
@@ -12,6 +13,6 @@ pub struct TriggerTx {
     /// The memo field content of the transaction.
     pub memo: String,
 
-    /// gas limit of the transaction.
-    pub gas_limit: u64,
+    /// Transaction fee
+    pub fee: Fee,
 }

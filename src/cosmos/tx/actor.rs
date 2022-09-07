@@ -15,7 +15,7 @@ where
         ctx.run_interval(self.batch_window, |act, ctx| {
             ctx.address().do_send(TriggerTx {
                 memo: act.memo.clone(),
-                gas_limit: act.gas_limit,
+                fee: act.fee.clone(),
             })
         });
     }

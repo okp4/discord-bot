@@ -12,7 +12,6 @@ use crate::discord_client::DiscordActor;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
-use cosmrs::Coin;
 use serenity::model::user::User;
 use std::time::Duration;
 use tonic::transport::Channel;
@@ -37,12 +36,12 @@ where
     pub sender: Account,
     /// Common memo used for batch transaction
     pub memo: String,
-    /// Common gas linit used for batch transaction
-    pub gas_limit: u64,
-    /// Common fee amount used for batch transaction
-    pub fee_amount: Coin,
+    /// Common fees used for batch transaction
+    pub fee: Fee,
     /// Duration between two transactions.
     pub batch_window: Duration,
+    /// Set the discord channel where to send transaction result.
+    pub channel_id: Option<u64>,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs: Vec<T>,
     /// Contains the list of all user that request transaction.
@@ -62,18 +61,18 @@ where
         chain_id: String,
         sender: Account,
         memo: String,
-        gas_limit: u64,
-        fee_amount: Coin,
+        fee: Fee,
         batch_window: Duration,
+        channel_id: Option<u64>,
         actors: Actors,
     ) -> TxHandler<T> {
         Self {
             chain_id,
             sender,
             memo,
-            gas_limit,
-            fee_amount,
+            fee,
             batch_window,
+            channel_id,
             msgs: vec![],
             subscribers: vec![],
             grpc_client: actors.grpc_client,

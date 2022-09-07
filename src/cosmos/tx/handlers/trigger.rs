@@ -1,15 +1,13 @@
 //! Trigger transaction handler
 
-use crate::cli::prelude::APP;
 use crate::cosmos::client::messages::broadcast_tx::{BroadcastTx, BroadcastTxResult};
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
 use crate::discord_client::messages::send_msg::SendMessage;
-use abscissa_core::Application;
 use actix::{ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
-use cosmrs::tx::{Body, Fee, Msg};
+use cosmrs::tx::{Body, Msg};
 use serenity::prelude::Mentionable;
 use tracing::info;
 use tracing::log::error;
@@ -25,7 +23,6 @@ where
             info!("🥹 No message to submit");
             return Box::pin(async {}.into_actor(self));
         }
-        let config = APP.config();
 
         let msgs = self.msgs.clone();
         let subscribers = self.subscribers.clone();
@@ -57,15 +54,7 @@ where
                 let sign_tx = res
                     .map_err(Error::from)
                     .and_then(|value| value.map_err(Error::from))
-                    .and_then(|account| {
-                        let fee = Fee {
-                            amount: vec![act.fee_amount.clone()],
-                            gas_limit: message.gas_limit.into(),
-                            payer: None,
-                            granter: None,
-                        };
-                        act.sign_tx(&body, account, fee)
-                    });
+                    .and_then(|account| act.sign_tx(&body, account, act.fee.clone()));
                 (sign_tx, grpc_client)
             })
             .then(|(sign_tx, grpc_client), act, _| {
@@ -87,33 +76,36 @@ where
                 }
                 .into_actor(act)
             })
-            .map(move |tx_result, _, _| {
+            .map(move |tx_result, act, _| {
                 match tx_result.and_then(|i| i.map_err(Error::from)) {
                     Ok(tx_response) => {
                         info!(
-                            "Transaction successfuylly broadcasted : {}",
+                            "Transaction successfully broadcasted : {}",
                             tx_response.txhash
                         );
-                        discord_client.do_send(SendMessage {
-                            title: String::from("🚀 Transaction broadcasted!"),
-                            description: format!(
-                                "\t- 🤝 Transaction hash: {}
+                        match act.channel_id {
+                            Some(channel_id) => discord_client.do_send(SendMessage {
+                                title: String::from("🚀 Transaction broadcasted!"),
+                                description: format!(
+                                    "\t- 🤝 Transaction hash: {}
                             \t- ⚙️ Result code : {}
                             \t- ⛽️ Gas used: {}",
-                                tx_response.txhash, tx_response.code, tx_response.gas_used
-                            ),
-                            content: {
-                                let mut str = String::new();
-                                for sub in subscribers {
-                                    str.push_str(
-                                        &format_args!("{member} ", member = &sub.mention())
-                                            .to_string(),
-                                    );
-                                }
-                                str
-                            },
-                            channel_id: config.faucet.channel_id,
-                        });
+                                    tx_response.txhash, tx_response.code, tx_response.gas_used
+                                ),
+                                content: {
+                                    let mut str = String::new();
+                                    for sub in subscribers {
+                                        str.push_str(
+                                            &format_args!("{member} ", member = &sub.mention())
+                                                .to_string(),
+                                        );
+                                    }
+                                    str
+                                },
+                                channel_id,
+                            }),
+                            None => {}
+                        };
                     }
                     Err(why) => error!("❌ Failed sign transaction {}", why),
                 }

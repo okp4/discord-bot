@@ -5,6 +5,7 @@ use std::process;
 use abscissa_core::{config, Command, FrameworkError, FrameworkErrorKind, Runnable};
 use actix::Actor;
 use clap::Parser;
+use cosmrs::tx::Fee;
 use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
@@ -74,12 +75,17 @@ impl Runnable for StartCmd {
                 config.chain.chain_id.to_string(),
                 sender.clone(),
                 config.faucet.memo.to_string(),
-                config.faucet.gas_limit,
-                Coin {
-                    denom: config.chain.denom.parse().unwrap(),
-                    amount: config.faucet.fee_amount as u128,
+                Fee {
+                    amount: vec![Coin {
+                        denom: config.chain.denom.parse().unwrap(),
+                        amount: config.faucet.fee_amount as u128,
+                    }],
+                    gas_limit: config.faucet.gas_limit.into(),
+                    payer: None,
+                    granter: None,
                 },
                 config.chain.batch_transaction_window,
+                Some(config.faucet.channel_id),
                 Actors {
                     grpc_client: addr_cosmos_client.clone(),
                     discord_client: addr_discord_client.clone(),
