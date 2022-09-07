@@ -4,16 +4,15 @@ mod actor;
 mod handlers;
 pub mod messages;
 
-use crate::cosmos::client::account::Account;
 use crate::cosmos::tx::TxHandler;
 use actix::Addr;
 use cosmrs::bank::MsgSend;
-use cosmrs::Coin;
+use cosmrs::{Coin, AccountId};
 
 /// Represent a faucet actor allowing send defined amount to a recipient.
 pub struct Faucet {
     /// Faucet sender account
-    pub sender: Account,
+    pub sender: AccountId,
     /// Transaction amount
     pub amount: Coin,
     /// Transaction handler client address to send transaction

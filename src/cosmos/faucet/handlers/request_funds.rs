@@ -10,7 +10,7 @@ impl Handler<RequestFunds> for Faucet {
 
     fn handle(&mut self, msg: RequestFunds, _: &mut Self::Context) -> Self::Result {
         let msg_send = MsgSend {
-            from_address: self.sender.address.clone(),
+            from_address: self.sender.clone(),
             to_address: msg.address.clone(),
             amount: vec![self.amount.clone()],
         };

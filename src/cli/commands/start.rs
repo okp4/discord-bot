@@ -96,7 +96,7 @@ impl Runnable for StartCmd {
             .start();
 
             let addr_faucet = Faucet {
-                sender: sender.clone(),
+                sender: sender.address.clone(),
                 amount: Coin {
                     amount: config.faucet.amount_send as u128,
                     denom: config.chain.denom.parse().unwrap(),
