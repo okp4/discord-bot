@@ -19,8 +19,10 @@ use crate::{
         faucet::Faucet,
         tx::{Actors, TxHandler},
     },
-    discord_client::DiscordActor,
-    discord_server,
+    discord::{
+        discord_client::DiscordActor,
+        discord_server,
+    }
 };
 
 #[derive(Command, Debug, Parser)]

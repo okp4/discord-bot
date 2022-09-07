@@ -5,7 +5,7 @@ use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult}
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
-use crate::discord_client::messages::send_msg::SendMessage;
+use crate::discord::discord_client::messages::send_msg::SendMessage;
 use actix::{ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Msg};
 use serenity::prelude::Mentionable;

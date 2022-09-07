@@ -2,7 +2,7 @@ use actix::{ContextFutureSpawner, Handler, WrapFuture};
 use serenity::{http::Http, model::id::ChannelId};
 use tracing::log::{info, warn};
 
-use crate::discord_client::{
+use crate::discord::discord_client::{
     messages::send_msg::{SendMessage, SendMessageResult},
     DiscordActor,
 };

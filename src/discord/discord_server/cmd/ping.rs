@@ -1,7 +1,7 @@
 //! Hold the ping command functions
-use crate::discord_server::cmd::CommandExecutable;
-use crate::discord_server::error::Error;
-use crate::discord_server::Actors;
+use crate::discord::discord_server::cmd::CommandExecutable;
+use crate::discord::discord_server::error::Error;
+use crate::discord::discord_server::Actors;
 use serenity::async_trait;
 use serenity::client::Context;
 use serenity::model::application::interaction::application_command::ApplicationCommandInteraction;

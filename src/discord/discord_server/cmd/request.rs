@@ -2,9 +2,9 @@
 
 use crate::cosmos::client::error::Error as ChainError;
 use crate::cosmos::faucet::messages::request_funds::RequestFunds;
-use crate::discord_server::cmd::CommandExecutable;
-use crate::discord_server::error::{Error, ErrorKind};
-use crate::discord_server::Actors;
+use crate::discord::discord_server::cmd::CommandExecutable;
+use crate::discord::discord_server::error::{Error, ErrorKind};
+use crate::discord::discord_server::Actors;
 use cosmrs::Error as CosmosError;
 use serenity::async_trait;
 use serenity::client::Context;

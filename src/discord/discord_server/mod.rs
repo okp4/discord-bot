@@ -2,19 +2,19 @@
 use crate::cosmos::client::error::Error as ChainError;
 use crate::cosmos::faucet::Faucet;
 use crate::cosmos::tx::TxHandler;
-use crate::discord_server::cmd::ping::PingCmd;
-use crate::discord_server::cmd::request::RequestCmd;
-use crate::discord_server::cmd::CommandExecutable;
-use crate::discord_server::cmd::DiscordCommand;
-use crate::discord_server::error::Error as DiscordError;
-use crate::discord_server::error::ErrorKind::IncorrectArg;
-use crate::discord_server::error::ErrorKind::MissingArg;
-use crate::discord_server::error::ErrorKind::UnknownCommand;
-use crate::discord_server::metrics_discord::{
+use crate::discord::discord_server::cmd::ping::PingCmd;
+use crate::discord::discord_server::cmd::request::RequestCmd;
+use crate::discord::discord_server::cmd::CommandExecutable;
+use crate::discord::discord_server::cmd::DiscordCommand;
+use crate::discord::discord_server::error::Error as DiscordError;
+use crate::discord::discord_server::error::ErrorKind::IncorrectArg;
+use crate::discord::discord_server::error::ErrorKind::MissingArg;
+use crate::discord::discord_server::error::ErrorKind::UnknownCommand;
+use crate::discord::discord_server::metrics_discord::{
     LABEL_NAME_COMMAND, LABEL_NAME_INTERACTION, LABEL_VALUE_COMMAND_UNKNOWN,
     METRIC_DISCORD_INTERACTIONS_DURATION, METRIC_DISCORD_INTERACTIONS_TOTAL,
 };
-use crate::discord_server::utils::interation_name;
+use crate::discord::discord_server::utils::interation_name;
 use crate::error::{Error, ErrorKind};
 use actix::Addr;
 use cosmrs::bank::MsgSend;

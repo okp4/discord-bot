@@ -15,8 +15,7 @@
 
 pub mod cli;
 pub mod cosmos;
-pub mod discord_client;
-pub mod discord_server;
+pub mod discord;
 pub mod error;
 
 use crate::cli::prelude::*;

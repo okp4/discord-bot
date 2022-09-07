@@ -8,7 +8,7 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
-use crate::discord_client::DiscordActor;
+use crate::discord::discord_client::DiscordActor;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
