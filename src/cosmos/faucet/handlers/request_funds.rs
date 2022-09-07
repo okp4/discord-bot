@@ -1,6 +1,6 @@
 use crate::cosmos::faucet::messages::request_funds::{RequestFunds, RequestFundsResult};
 use crate::cosmos::faucet::Faucet;
-use crate::cosmos::tx::messages::register::RegisterTx;
+use crate::cosmos::tx::messages::register::RegisterMsg;
 use actix::Handler;
 use cosmrs::bank::MsgSend;
 use tracing::info;
@@ -16,7 +16,7 @@ impl Handler<RequestFunds> for Faucet {
         };
 
         self.tx_handler
-            .do_send(RegisterTx::new(msg_send, Some(msg.requester)));
+            .do_send(RegisterMsg::new(msg_send, Some(msg.requester)));
 
         info!("✍️  Register request funds for {}", msg.address);
     }

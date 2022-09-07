@@ -4,28 +4,28 @@ use actix::Message;
 use cosmrs::tx::Msg;
 use serenity::model::user::User;
 
-/// Result of a register tx message.
-pub type RegisterTxResult = ();
+/// Result of a RegisterMsg message.
+pub type RegisterMsgResult = ();
 
-/// Register transaction actor message.
+/// Register transaction's message actor message.
 #[derive(Message)]
-#[rtype(result = "RegisterTxResult")]
-pub struct RegisterTx<T>
+#[rtype(result = "RegisterMsgResult")]
+pub struct RegisterMsg<T>
 where
     T: Msg,
 {
     /// Contains the messages to embed in the transaction.
-    pub(crate) msg: T,
+    pub msg: T,
 
     /// Transaction subscriber
-    pub(crate) subscriber: Option<User>,
+    pub subscriber: Option<User>,
 }
 
-impl<T> RegisterTx<T>
+impl<T> RegisterMsg<T>
 where
     T: Msg,
 {
-    /// Create a new RegisterTx.
+    /// Create a new RegisterMsg.
     pub fn new(msg: T, subscriber: Option<User>) -> Self
     where
         T: Msg,
