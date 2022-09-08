@@ -8,32 +8,21 @@ pub mod messages;
 
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
-use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
 use crate::cosmos::tx::error::Error;
-use crate::discord::discord_client::message::DiscordMessage;
-use crate::discord::discord_client::DiscordActor;
-use actix::Addr;
+use crate::cosmos::tx::messages::response::TxResponse;
+use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use serenity::model::user::User;
-use std::marker::PhantomData;
 use std::time::Duration;
 use tonic::transport::Channel;
 
-/// Contains addresses of actors that will be used by the TxHandler
-pub struct Actors {
-    /// GRPC client to send transaction.
-    pub grpc_client: Addr<Client<Channel>>,
-    /// Address of the Discord client Actor
-    pub discord_client: Addr<DiscordActor>,
-}
-
 /// Actor that will manage all transaction to the cosmos blockchain
 /// Each transaction will be trigger each X seconds.
-pub struct TxHandler<T, M>
+pub struct TxHandler<T, R>
 where
     T: Msg + Unpin,
-    M: TransactionDiscordMessage + DiscordMessage + Unpin + 'static,
+    R: Actor + Handler<TxResponse>,
 {
     /// Cosmos chain id.
     pub chain_id: String,
@@ -45,50 +34,45 @@ where
     pub fee: Fee,
     /// Duration between two transactions.
     pub batch_window: Duration,
-    /// Set the discord channel where to send transaction result.
-    pub channel_id: u64,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs: Vec<T>,
     /// Contains the list of all user that request transaction.
     subscribers: Vec<User>,
     /// GRPC client to send transaction.
     grpc_client: Addr<Client<Channel>>,
-    /// Address of the Discord client Actor
-    discord_client: Addr<DiscordActor>,
-    /// To tell compiler that the message type is of type M and to avoid unused generic parameter compilation error.
-    /// This is mandatory if we would like to instantiate the message with it's static method `::build_message`.
-    /// See [E0392](https://doc.rust-lang.org/error-index.html#E0392) for more detail of usage of PhantomData.
-    phantom: PhantomData<M>,
+    /// Hold address of actor that will receive message when a transaction has been broadcasted.
+    response_handler: Option<Addr<R>>,
 }
 
-impl<T, M> TxHandler<T, M>
+impl<T, R> TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
-    M: TransactionDiscordMessage + Unpin + DiscordMessage,
+    R: Actor + Handler<TxResponse>,
 {
     /// Create a new TxHandler for a specific message type.
-    pub fn new(
+    pub fn new<F>(
         chain_id: String,
         sender: Account,
-        memo: String,
         fee: Fee,
-        batch_window: Duration,
-        channel_id: u64,
-        actors: Actors,
-    ) -> TxHandler<T, M> {
-        Self {
+        grpc_client: Addr<Client<Channel>>,
+        f: F,
+    ) -> TxHandler<T, R>
+    where
+        F: FnOnce(&mut TxHandler<T, R>) -> &mut TxHandler<T, R>,
+    {
+        let mut handler: TxHandler<T, R> = Self {
             chain_id,
             sender,
-            memo,
+            memo: "".to_string(),
             fee,
-            batch_window,
-            channel_id,
+            batch_window: Duration::new(8, 0),
             msgs: vec![],
             subscribers: vec![],
-            grpc_client: actors.grpc_client,
-            discord_client: actors.discord_client,
-            phantom: PhantomData,
-        }
+            grpc_client,
+            response_handler: None,
+        };
+        f(&mut handler);
+        handler
     }
 
     /// Sign a transaction messages.

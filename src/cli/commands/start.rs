@@ -9,7 +9,7 @@ use cosmrs::tx::Fee;
 use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
-use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
+use crate::cosmos::tx::messages::register_handler::RegisterResponseHandler;
 use crate::{
     cli::{
         config::{DiscordBotConfig, DiscordShardingSection},
@@ -18,9 +18,9 @@ use crate::{
     cosmos::{
         client::{account::Account, Client},
         faucet::Faucet,
-        tx::{Actors, TxHandler},
+        tx::TxHandler,
     },
-    discord::{discord_client::DiscordActor, discord_server},
+    discord::discord_server,
 };
 
 #[derive(Command, Debug, Parser)]
@@ -65,8 +65,6 @@ impl Runnable for StartCmd {
             let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
                 .expect("💀 Cannot create faucet account");
 
-            let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
-
             let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
                 .await
                 .map_err(|err| {
@@ -75,10 +73,9 @@ impl Runnable for StartCmd {
                 .unwrap()
                 .start();
 
-            let addr_tx_handler = TxHandler::<MsgSend, FaucetTransactionMessage>::new(
+            let addr_tx_handler = TxHandler::<MsgSend, Faucet>::new(
                 config.chain.chain_id.to_string(),
                 sender.to_owned(),
-                config.faucet.memo.to_string(),
                 Fee {
                     amount: vec![Coin {
                         denom: config.chain.denom.parse().unwrap(),
@@ -88,11 +85,11 @@ impl Runnable for StartCmd {
                     payer: None,
                     granter: None,
                 },
-                config.chain.batch_transaction_window,
-                config.faucet.channel_id,
-                Actors {
-                    grpc_client: addr_cosmos_client.clone(),
-                    discord_client: addr_discord_client.clone(),
+                addr_cosmos_client.clone(),
+                |handler| {
+                    handler.memo = config.faucet.memo.to_string();
+                    handler.batch_window = config.chain.batch_transaction_window;
+                    handler
                 },
             )
             .start();
@@ -106,6 +103,10 @@ impl Runnable for StartCmd {
                 tx_handler: addr_tx_handler.clone(),
             }
             .start();
+
+            addr_tx_handler.do_send(RegisterResponseHandler {
+                handler: addr_faucet.clone(),
+            });
 
             match discord_server::start(
                 &config.discord.token,

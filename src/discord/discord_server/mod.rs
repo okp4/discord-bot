@@ -30,7 +30,6 @@ use std::str::FromStr;
 use std::time::Instant;
 use tonic::transport::Channel;
 
-use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
 use tracing::{debug, error, info, warn};
 
 pub mod cmd;
@@ -42,7 +41,7 @@ pub mod utils;
 #[derive(Clone)]
 pub struct Actors {
     /// Cosmos transaction handler actor address
-    pub tx_handler: Addr<TxHandler<MsgSend, FaucetTransactionMessage>>,
+    pub tx_handler: Addr<TxHandler<MsgSend, Faucet>>,
     /// Cosmos client actor address
     pub cosmos_client: Addr<crate::cosmos::client::Client<Channel>>,
     /// Cosmos faucet actor address
