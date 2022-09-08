@@ -42,7 +42,7 @@ pub mod utils;
 #[derive(Clone)]
 pub struct Actors {
     /// Cosmos transaction handler actor address
-    pub tx_handler: Addr<TxHandler<MsgSend, FaucetTransactionMessage>>,
+    pub tx_handler: Addr<TxHandler<MsgSend, Faucet>>,
     /// Cosmos client actor address
     pub cosmos_client: Addr<crate::cosmos::client::Client<Channel>>,
     /// Cosmos faucet actor address

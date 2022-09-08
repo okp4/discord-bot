@@ -1,15 +1,14 @@
 use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
 use crate::cosmos::tx::messages::trigger::TriggerTx;
-use crate::cosmos::tx::TxHandler;
+use crate::cosmos::tx::{messages, TxHandler};
 use crate::discord::discord_client::message::DiscordMessage;
-use actix::{Actor, AsyncContext, Context};
+use actix::{Actor, AsyncContext, Context, Handler};
 use cosmrs::tx::Msg;
 use tracing::info;
 
-impl<T, M> Actor for TxHandler<T, M>
+impl<T> Actor for TxHandler<T>
 where
     T: Msg + Unpin + 'static,
-    M: TransactionDiscordMessage + DiscordMessage + Unpin + Send + 'static,
 {
     type Context = Context<Self>;
 

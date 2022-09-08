@@ -18,7 +18,7 @@ use crate::{
     cosmos::{
         client::{account::Account, Client},
         faucet::Faucet,
-        tx::{Actors, TxHandler},
+        tx::{TxHandler},
     },
     discord::{discord_client::DiscordActor, discord_server},
 };
@@ -71,10 +71,9 @@ impl Runnable for StartCmd {
                 .unwrap()
                 .start();
 
-            let addr_tx_handler = TxHandler::<MsgSend, FaucetTransactionMessage>::new(
+            let addr_tx_handler = TxHandler::<MsgSend, Faucet>::new(
                 config.chain.chain_id.to_string(),
                 sender.to_owned(),
-                config.faucet.memo.to_string(),
                 Fee {
                     amount: vec![Coin {
                         denom: config.chain.denom.parse().unwrap(),
@@ -84,14 +83,13 @@ impl Runnable for StartCmd {
                     payer: None,
                     granter: None,
                 },
-                config.chain.batch_transaction_window,
-                config.faucet.channel_id,
-                Actors {
-                    grpc_client: addr_cosmos_client.clone(),
-                    discord_client: addr_discord_client.clone(),
-                },
-            )
-            .start();
+                addr_cosmos_client.clone(),
+                |handler| {
+                    handler.memo = config.faucet.memo.to_string();
+                    handler.batch_window = config.chain.batch_transaction_window;
+                    handler
+                }
+            ).start();
 
             let addr_faucet = Faucet {
                 sender: sender.address.clone(),
