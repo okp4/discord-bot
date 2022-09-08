@@ -1,11 +1,12 @@
 //! Holds all the faucet actor configuration
 
 mod actor;
+pub mod discord_message;
 mod handlers;
 pub mod messages;
 
+use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
 use crate::cosmos::tx::TxHandler;
-use crate::discord::discord_client::message::FaucetTransactionMessage;
 use actix::Addr;
 use cosmrs::bank::MsgSend;
 use cosmrs::{AccountId, Coin};

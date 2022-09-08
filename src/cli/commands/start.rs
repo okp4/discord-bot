@@ -9,7 +9,7 @@ use cosmrs::tx::Fee;
 use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
-use crate::discord::discord_client::message::FaucetTransactionMessage;
+use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
 use crate::{
     cli::{
         config::{DiscordBotConfig, DiscordShardingSection},
