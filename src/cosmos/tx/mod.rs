@@ -6,7 +6,6 @@ pub mod error;
 pub mod handlers;
 pub mod messages;
 
-use std::marker::PhantomData;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
@@ -17,12 +16,12 @@ use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use serenity::model::user::User;
+use std::marker::PhantomData;
 use std::time::Duration;
 use tonic::transport::Channel;
 
 /// Contains addresses of actors that will be used by the TxHandler
-pub struct Actors
-{
+pub struct Actors {
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
     /// Address of the Discord client Actor
@@ -47,7 +46,7 @@ where
     /// Duration between two transactions.
     pub batch_window: Duration,
     /// Set the discord channel where to send transaction result.
-    pub channel_id: Option<u64>,
+    pub channel_id: u64,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs: Vec<T>,
     /// Contains the list of all user that request transaction.
@@ -59,7 +58,7 @@ where
     /// To tell compiler that the message type is of type M and to avoid unused generic parameter compilation error.
     /// This is mandatory if we would like to instantiate the message with it's static method `::build_message`.
     /// See [E0392](https://doc.rust-lang.org/error-index.html#E0392) for more detail of usage of PhantomData.
-    phantom: PhantomData<M>
+    phantom: PhantomData<M>,
 }
 
 impl<T, M> TxHandler<T, M>
@@ -74,7 +73,7 @@ where
         memo: String,
         fee: Fee,
         batch_window: Duration,
-        channel_id: Option<u64>,
+        channel_id: u64,
         actors: Actors,
     ) -> TxHandler<T, M> {
         Self {
@@ -88,7 +87,7 @@ where
             subscribers: vec![],
             grpc_client: actors.grpc_client,
             discord_client: actors.discord_client,
-            phantom: PhantomData
+            phantom: PhantomData,
         }
     }
 

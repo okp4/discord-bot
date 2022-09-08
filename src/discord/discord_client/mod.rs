@@ -6,17 +6,13 @@ pub mod message;
 pub mod messages;
 
 /// Discord actor client
-pub struct DiscordActor
-{
+pub struct DiscordActor {
     token: String,
 }
 
-impl DiscordActor
-{
+impl DiscordActor {
     /// Create a new discord actor client
     pub fn new(token: String) -> Self {
-        DiscordActor {
-            token
-        }
+        DiscordActor { token }
     }
 }
