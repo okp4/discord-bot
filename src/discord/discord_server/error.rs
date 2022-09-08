@@ -1,10 +1,11 @@
 //! Error types
 
+use crate::cosmos::client::error::Error as ChainError;
 use abscissa_core::error::{BoxError, Context};
+use cosmrs::Error as CosmosError;
 use serenity::Error as SerenityError;
 use std::{
     fmt::{self, Display},
-    io,
     ops::Deref,
 };
 use thiserror::Error;
@@ -12,29 +13,25 @@ use thiserror::Error;
 /// Kinds of errors
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum ErrorKind {
-    /// Error in configuration file
-    #[error("config error")]
-    Config,
+    /// Unknown command execution error
+    #[error("Unknown error")]
+    UnknownCommand(String),
 
-    /// Input/output error
-    #[error("I/O error")]
-    Io,
+    /// Missing arg for command
+    #[error("Missing {0} arg")]
+    MissingArg(String),
 
-    /// Input/output error
-    #[error("Client error")]
-    Client(String),
+    /// Arg is incorrect
+    #[error("{0} arg is incorrect {1}")]
+    IncorrectArg(String, String),
 
     /// Errors from Serenity
     #[error("Serenity Error {0}")]
-    SerenityError(String),
+    Serenity(String),
 
-    /// Cosmos Error
-    #[error("Cosmos error")]
-    CosmosError(String),
-
-    /// Cosmos client Error
-    #[error("Cosmos client error")]
-    CosmosClientError(String),
+    /// Errors from the grpc client
+    #[error("GRPC client error : {0}")]
+    Chain(ChainError),
 }
 
 impl ErrorKind {
@@ -80,30 +77,20 @@ impl From<Context<ErrorKind>> for Error {
     }
 }
 
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        ErrorKind::Io.context(err).into()
-    }
-}
-
 impl From<SerenityError> for Error {
     fn from(err: SerenityError) -> Self {
-        ErrorKind::SerenityError(err.to_string())
-            .context(err)
-            .into()
+        ErrorKind::Serenity(err.to_string()).context(err).into()
     }
 }
 
-impl From<cosmrs::Error> for Error {
-    fn from(err: cosmrs::Error) -> Self {
-        ErrorKind::CosmosError(err.to_string()).context(err).into()
+impl From<ChainError> for Error {
+    fn from(err: ChainError) -> Self {
+        Error::from(ErrorKind::Chain(err))
     }
 }
 
-impl From<crate::cosmos::client::error::Error> for Error {
-    fn from(err: crate::cosmos::client::error::Error) -> Self {
-        ErrorKind::CosmosClientError(err.to_string())
-            .context(err)
-            .into()
+impl From<CosmosError> for Error {
+    fn from(err: CosmosError) -> Self {
+        Error::from(ChainError::from(err))
     }
 }
