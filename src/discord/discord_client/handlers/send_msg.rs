@@ -8,7 +8,7 @@ use crate::discord::discord_client::{
     DiscordActor,
 };
 
-impl<M> Handler<SendMessage<M>> for DiscordActor<M>
+impl<M> Handler<SendMessage<M>> for DiscordActor
 where
     M: DiscordMessage + Unpin + 'static,
 {

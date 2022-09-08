@@ -6,6 +6,7 @@ pub mod error;
 pub mod handlers;
 pub mod messages;
 
+use std::marker::PhantomData;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
@@ -20,14 +21,12 @@ use std::time::Duration;
 use tonic::transport::Channel;
 
 /// Contains addresses of actors that will be used by the TxHandler
-pub struct Actors<M>
-where
-    M: TransactionDiscordMessage + DiscordMessage + Unpin + 'static,
+pub struct Actors
 {
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
     /// Address of the Discord client Actor
-    pub discord_client: Addr<DiscordActor<M>>,
+    pub discord_client: Addr<DiscordActor>,
 }
 
 /// Actor that will manage all transaction to the cosmos blockchain
@@ -56,7 +55,11 @@ where
     /// GRPC client to send transaction.
     grpc_client: Addr<Client<Channel>>,
     /// Address of the Discord client Actor
-    discord_client: Addr<DiscordActor<M>>,
+    discord_client: Addr<DiscordActor>,
+    /// To tell compiler that the message type is of type M and to avoid unused generic parameter compilation error.
+    /// This is mandatory if we would like to instantiate the message with it's static method `::build_message`.
+    /// See [E0392](https://doc.rust-lang.org/error-index.html#E0392) for more detail of usage of PhantomData.
+    phantom: PhantomData<M>
 }
 
 impl<T, M> TxHandler<T, M>
@@ -72,7 +75,7 @@ where
         fee: Fee,
         batch_window: Duration,
         channel_id: Option<u64>,
-        actors: Actors<M>,
+        actors: Actors,
     ) -> TxHandler<T, M> {
         Self {
             chain_id,
@@ -85,6 +88,7 @@ where
             subscribers: vec![],
             grpc_client: actors.grpc_client,
             discord_client: actors.discord_client,
+            phantom: PhantomData
         }
     }
 
