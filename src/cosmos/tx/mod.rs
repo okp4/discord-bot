@@ -8,6 +8,7 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
+use crate::discord::discord_client::message::{DiscordMessage, TransactionMessage};
 use crate::discord::discord_client::DiscordActor;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
@@ -17,18 +18,22 @@ use std::time::Duration;
 use tonic::transport::Channel;
 
 /// Contains addresses of actors that will be used by the TxHandler
-pub struct Actors {
+pub struct Actors<M>
+where
+    M: TransactionMessage + DiscordMessage + Unpin + 'static,
+{
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
     /// Address of the Discord client Actor
-    pub discord_client: Addr<DiscordActor>,
+    pub discord_client: Addr<DiscordActor<M>>,
 }
 
 /// Actor that will manage all transaction to the cosmos blockchain
 /// Each transaction will be trigger each X seconds.
-pub struct TxHandler<T>
+pub struct TxHandler<T, M>
 where
     T: Msg + Unpin,
+    M: TransactionMessage + DiscordMessage + Unpin + 'static,
 {
     /// Cosmos chain id.
     pub chain_id: String,
@@ -49,12 +54,13 @@ where
     /// GRPC client to send transaction.
     grpc_client: Addr<Client<Channel>>,
     /// Address of the Discord client Actor
-    discord_client: Addr<DiscordActor>,
+    discord_client: Addr<DiscordActor<M>>,
 }
 
-impl<T> TxHandler<T>
+impl<T, M> TxHandler<T, M>
 where
     T: Msg + Unpin + 'static,
+    M: TransactionMessage + Unpin + DiscordMessage,
 {
     /// Create a new TxHandler for a specific message type.
     pub fn new(
@@ -64,8 +70,8 @@ where
         fee: Fee,
         batch_window: Duration,
         channel_id: Option<u64>,
-        actors: Actors,
-    ) -> TxHandler<T> {
+        actors: Actors<M>,
+    ) -> TxHandler<T, M> {
         Self {
             chain_id,
             sender,

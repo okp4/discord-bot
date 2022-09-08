@@ -9,6 +9,7 @@ use cosmrs::tx::Fee;
 use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
+use crate::discord::discord_client::message::FaucetTransactionMessage;
 use crate::{
     cli::{
         config::{DiscordBotConfig, DiscordShardingSection},
@@ -70,7 +71,7 @@ impl Runnable for StartCmd {
                 .unwrap()
                 .start();
 
-            let addr_tx_handler = TxHandler::<MsgSend>::new(
+            let addr_tx_handler = TxHandler::<MsgSend, FaucetTransactionMessage>::new(
                 config.chain.chain_id.to_string(),
                 sender.to_owned(),
                 config.faucet.memo.to_string(),
