@@ -5,16 +5,17 @@ use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult}
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
+use crate::discord::discord_client::message::{DiscordMessage, TransactionMessage};
 use crate::discord::discord_client::messages::send_msg::SendMessage;
 use actix::{ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Msg};
-use serenity::prelude::Mentionable;
 use tracing::info;
 use tracing::log::error;
 
-impl<T> Handler<TriggerTx> for TxHandler<T>
+impl<T, M> Handler<TriggerTx> for TxHandler<T, M>
 where
     T: Msg + Unpin + 'static,
+    M: TransactionMessage + DiscordMessage + Unpin + Send + 'static,
 {
     type Result = ResponseActFuture<Self, TriggerTxResult>;
 
@@ -77,61 +78,15 @@ where
                     .into_actor(act)
             })
             .map(move |tx_result, act, _| {
-                match tx_result.and_then(|i| i.map_err(Error::from)) {
-                    Ok(tx_response) => {
-                        info!(
-                        "Transaction successfully broadcasted : {}",
-                        tx_response.txhash
-                    );
-                    act.channel_id.map_or_else(
-                        || error!("No channel id to send the message to"),
-                        |channel_id| {
-                            discord_client.do_send(SendMessage {
-                                title: String::from("🚀 Transaction broadcasted!"),
-                                description: format!(
-                                    "\t- 🤝 Transaction hash: {}
-                                    \t- ⚙️ Result code : {}
-                                    \t- ⛽️ Gas used: {}",
-                                    tx_response.txhash, tx_response.code, tx_response.gas_used
-                                ),
-                                content: {
-                                    let mut str = String::new();
-                                    for sub in subscribers {
-                                        str.push_str(
-                                            &format_args!("{member} ", member = &sub.mention())
-                                                .to_string(),
-                                        );
-                                    }
-                                    str
-                                },
-                                channel_id,
-                            })
-                        })
-                    }
-                    Err(why) => {
-                        error!("❌ Failed sign transaction {}", why);
-                        act.channel_id.map_or_else(
-                            || error!("No channel id to send the message to"),
-                            |channel_id| {
-                                discord_client.do_send(SendMessage {
-                                    title: String::from("🤷 So sorry, something went wrong"),
-                                    description: String::from("You're request was not processed.\nThe transaction was not broadcasted."),
-                                    content: {
-                                        let mut str = String::new();
-                                        for sub in subscribers {
-                                            str.push_str(
-                                                &format_args!("{member} ", member = &sub.mention())
-                                                    .to_string(),
-                                            );
-                                        }
-                                        str
-                                    },
-                                    channel_id,
-                                });
-                            },
-                        );
-                    }
-                }
+                info!("📩 Transaction broadcasted");
+                let discord_message = M::build_message(
+                    tx_result.and_then(|i| i.map_err(Error::from)),
+                    subscribers,
+                    act.channel_id.unwrap(),
+                );
+                discord_client.do_send(SendMessage {
+                    message: discord_message,
+                });
             }),
         )
     }

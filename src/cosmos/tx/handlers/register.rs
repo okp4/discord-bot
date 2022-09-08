@@ -2,12 +2,14 @@
 
 use crate::cosmos::tx::messages::register::{RegisterMsg, RegisterMsgResult};
 use crate::cosmos::tx::TxHandler;
+use crate::discord::discord_client::message::{DiscordMessage, TransactionMessage};
 use actix::Handler;
 use cosmrs::tx::Msg;
 
-impl<T> Handler<RegisterMsg<T>> for TxHandler<T>
+impl<T, M> Handler<RegisterMsg<T>> for TxHandler<T, M>
 where
     T: Msg + Unpin + 'static,
+    M: TransactionMessage + DiscordMessage + Unpin + Send + 'static,
 {
     type Result = RegisterMsgResult;
 
