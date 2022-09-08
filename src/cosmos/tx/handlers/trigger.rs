@@ -2,10 +2,11 @@
 
 use crate::cosmos::client::messages::broadcast_tx::{BroadcastTx, BroadcastTxResult};
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
+use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
-use crate::discord::discord_client::message::{DiscordMessage, TransactionMessage};
+use crate::discord::discord_client::message::DiscordMessage;
 use crate::discord::discord_client::messages::send_msg::SendMessage;
 use actix::{ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Msg};
@@ -15,7 +16,7 @@ use tracing::log::error;
 impl<T, M> Handler<TriggerTx> for TxHandler<T, M>
 where
     T: Msg + Unpin + 'static,
-    M: TransactionMessage + DiscordMessage + Unpin + Send + 'static,
+    M: TransactionDiscordMessage + DiscordMessage + Unpin + Send + 'static,
 {
     type Result = ResponseActFuture<Self, TriggerTxResult>;
 

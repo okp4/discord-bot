@@ -1,14 +1,16 @@
 //! Holds Tx actors.
 
 mod actor;
+pub mod discord_message;
 pub mod error;
 pub mod handlers;
 pub mod messages;
 
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
+use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
 use crate::cosmos::tx::error::Error;
-use crate::discord::discord_client::message::{DiscordMessage, TransactionMessage};
+use crate::discord::discord_client::message::DiscordMessage;
 use crate::discord::discord_client::DiscordActor;
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
@@ -20,7 +22,7 @@ use tonic::transport::Channel;
 /// Contains addresses of actors that will be used by the TxHandler
 pub struct Actors<M>
 where
-    M: TransactionMessage + DiscordMessage + Unpin + 'static,
+    M: TransactionDiscordMessage + DiscordMessage + Unpin + 'static,
 {
     /// GRPC client to send transaction.
     pub grpc_client: Addr<Client<Channel>>,
@@ -33,7 +35,7 @@ where
 pub struct TxHandler<T, M>
 where
     T: Msg + Unpin,
-    M: TransactionMessage + DiscordMessage + Unpin + 'static,
+    M: TransactionDiscordMessage + DiscordMessage + Unpin + 'static,
 {
     /// Cosmos chain id.
     pub chain_id: String,
@@ -60,7 +62,7 @@ where
 impl<T, M> TxHandler<T, M>
 where
     T: Msg + Unpin + 'static,
-    M: TransactionMessage + Unpin + DiscordMessage,
+    M: TransactionDiscordMessage + Unpin + DiscordMessage,
 {
     /// Create a new TxHandler for a specific message type.
     pub fn new(

@@ -30,7 +30,7 @@ use std::str::FromStr;
 use std::time::Instant;
 use tonic::transport::Channel;
 
-use crate::discord::discord_client::message::FaucetTransactionMessage;
+use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
 use tracing::{debug, error, info, warn};
 
 pub mod cmd;
