@@ -89,7 +89,7 @@ impl Runnable for StartCmd {
                     granter: None,
                 },
                 config.chain.batch_transaction_window,
-                Some(config.faucet.channel_id),
+                config.faucet.channel_id,
                 Actors {
                     grpc_client: addr_cosmos_client.clone(),
                     discord_client: addr_discord_client.clone(),

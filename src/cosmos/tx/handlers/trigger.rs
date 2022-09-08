@@ -83,7 +83,7 @@ where
                 let discord_message = M::build_message(
                     tx_result.and_then(|i| i.map_err(Error::from)),
                     subscribers,
-                    act.channel_id.unwrap(),
+                    act.channel_id,
                 );
                 discord_client.do_send(SendMessage {
                     message: discord_message,
