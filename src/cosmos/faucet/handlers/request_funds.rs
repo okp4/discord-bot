@@ -1,6 +1,6 @@
 use crate::cosmos::faucet::messages::request_funds::{RequestFunds, RequestFundsResult};
 use crate::cosmos::faucet::Faucet;
-use crate::cosmos::tx::messages::register::RegisterMsg;
+use crate::cosmos::tx::messages::register_msg::RegisterMsg;
 use actix::Handler;
 use cosmrs::bank::MsgSend;
 use tracing::info;

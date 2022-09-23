@@ -5,7 +5,7 @@ use serenity::http::Http;
 use serenity::model::channel::Message;
 use serenity::Error;
 
-/// Trait representing a disorcd message
+/// Trait representing a discord message
 #[async_trait]
 pub trait DiscordMessage {
     /// Return the channel id relative to send discord message.

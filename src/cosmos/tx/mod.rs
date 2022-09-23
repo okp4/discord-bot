@@ -9,6 +9,7 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
+use crate::cosmos::tx::messages::response::TxResponse;
 use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
@@ -18,9 +19,10 @@ use tonic::transport::Channel;
 
 /// Actor that will manage all transaction to the cosmos blockchain
 /// Each transaction will be trigger each X seconds.
-pub struct TxHandler<T>
+pub struct TxHandler<T, R>
 where
     T: Msg + Unpin,
+    R: Actor + Handler<TxResponse>,
 {
     /// Cosmos chain id.
     pub chain_id: String,
@@ -38,11 +40,14 @@ where
     subscribers: Vec<User>,
     /// GRPC client to send transaction.
     grpc_client: Addr<Client<Channel>>,
+    /// Hold address of actor that will receive message when a transaction has been broadcasted.
+    response_handler: Option<Addr<R>>,
 }
 
-impl<T> TxHandler<T>
+impl<T, R> TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
+    R: Actor + Handler<TxResponse>,
 {
     /// Create a new TxHandler for a specific message type.
     pub fn new<F>(
@@ -51,9 +56,11 @@ where
         fee: Fee,
         grpc_client: Addr<Client<Channel>>,
         f: F,
-    ) -> TxHandler<T>
-        where F: FnOnce(&mut TxHandler<T>) -> &mut TxHandler<T>, {
-        let mut handler: TxHandler<T> = Self {
+    ) -> TxHandler<T, R>
+    where
+        F: FnOnce(&mut TxHandler<T, R>) -> &mut TxHandler<T, R>,
+    {
+        let mut handler: TxHandler<T, R> = Self {
             chain_id,
             sender,
             memo: "".to_string(),
@@ -62,6 +69,7 @@ where
             msgs: vec![],
             subscribers: vec![],
             grpc_client,
+            response_handler: None,
         };
         f(&mut handler);
         handler

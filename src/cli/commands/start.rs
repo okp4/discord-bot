@@ -9,7 +9,7 @@ use cosmrs::tx::Fee;
 use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
-use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
+use crate::cosmos::tx::messages::register_handler::RegisterResponseHandler;
 use crate::{
     cli::{
         config::{DiscordBotConfig, DiscordShardingSection},
@@ -18,9 +18,9 @@ use crate::{
     cosmos::{
         client::{account::Account, Client},
         faucet::Faucet,
-        tx::{TxHandler},
+        tx::TxHandler,
     },
-    discord::{discord_client::DiscordActor, discord_server},
+    discord::discord_server,
 };
 
 #[derive(Command, Debug, Parser)]
@@ -61,8 +61,6 @@ impl Runnable for StartCmd {
             let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
                 .expect("💀 Cannot create faucet account");
 
-            let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
-
             let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
                 .await
                 .map_err(|err| {
@@ -88,8 +86,9 @@ impl Runnable for StartCmd {
                     handler.memo = config.faucet.memo.to_string();
                     handler.batch_window = config.chain.batch_transaction_window;
                     handler
-                }
-            ).start();
+                },
+            )
+            .start();
 
             let addr_faucet = Faucet {
                 sender: sender.address.clone(),
@@ -100,6 +99,10 @@ impl Runnable for StartCmd {
                 tx_handler: addr_tx_handler.clone(),
             }
             .start();
+
+            addr_tx_handler.do_send(RegisterResponseHandler {
+                handler: addr_faucet.clone(),
+            });
 
             match discord_server::start(
                 &config.discord.token,

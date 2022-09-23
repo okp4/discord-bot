@@ -1,4 +1,5 @@
 //! Holds tx handlers
 
-mod register;
+mod register_msg;
+mod register_handler;
 mod trigger;

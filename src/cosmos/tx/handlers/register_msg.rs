@@ -1,15 +1,17 @@
 //! Register transaction handler
 
-use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
-use crate::cosmos::tx::messages::register::{RegisterMsg, RegisterMsgResult};
-use crate::cosmos::tx::{messages, TxHandler};
-use crate::discord::discord_client::message::DiscordMessage;
+use crate::cosmos::tx::messages::register_msg::{RegisterMsg, RegisterMsgResult};
+use crate::cosmos::tx::messages::response::TxResponse;
+use crate::cosmos::tx::TxHandler;
+use actix::dev::ToEnvelope;
 use actix::{Actor, Handler};
 use cosmrs::tx::Msg;
 
-impl<T> Handler<RegisterMsg<T>> for TxHandler<T>
+impl<T, R> Handler<RegisterMsg<T>> for TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
+    R: Actor + Handler<TxResponse>,
+    R::Context: ToEnvelope<R, TxResponse>,
 {
     type Result = RegisterMsgResult;
 
