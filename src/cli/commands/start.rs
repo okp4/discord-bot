@@ -10,6 +10,7 @@ use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
 use crate::cosmos::tx::messages::register_handler::RegisterResponseHandler;
+use crate::discord::discord_client::DiscordActor;
 use crate::{
     cli::{
         config::{DiscordBotConfig, DiscordShardingSection},
@@ -22,7 +23,6 @@ use crate::{
     },
     discord::discord_server,
 };
-use crate::discord::discord_client::DiscordActor;
 
 #[derive(Command, Debug, Parser)]
 #[clap(arg_required_else_help(true))]

@@ -13,7 +13,7 @@ use serenity::prelude::Mentionable;
 use serenity::Error;
 use tracing::{error, info};
 
-/// The faucet respons emessage when transaction successful
+/// The faucet response message when transaction successful
 #[derive(Clone, Debug)]
 pub struct FaucetTransactionMessage {
     /// Title of the embedded message - optional
@@ -83,10 +83,6 @@ impl TransactionDiscordMessage for FaucetTransactionMessage {
 
 #[async_trait]
 impl DiscordMessage for FaucetTransactionMessage {
-    fn channel_id(&self) -> u64 {
-        self.channel_id
-    }
-
     async fn send_message(self, http: &Http) -> Result<Message, Error> {
         ChannelId(self.channel_id)
             .send_message(&http, |m| {

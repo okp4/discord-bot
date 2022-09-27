@@ -18,10 +18,7 @@ where
         let http = Http::new(&self.token);
 
         async move {
-            info!(
-                "✉️ Sending message to channel with ID {}",
-                msg.message.channel_id()
-            );
+            info!("✉️ Sending message to discord");
             let _ = msg
                 .message
                 .send_message(&http)

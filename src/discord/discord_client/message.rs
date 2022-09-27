@@ -8,8 +8,6 @@ use serenity::Error;
 /// Trait representing a discord message
 #[async_trait]
 pub trait DiscordMessage {
-    /// Return the channel id relative to send discord message.
-    fn channel_id(&self) -> u64;
     /// Send the message to discord
     async fn send_message(self, http: &Http) -> Result<Message, Error>;
 }
