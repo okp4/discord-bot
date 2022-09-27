@@ -76,7 +76,7 @@ where
                     };
                     result
                 }
-                    .into_actor(act)
+                .into_actor(act)
             })
             .map(move |tx_result, _, _| match response_handler {
                 Some(r) => r.do_send(TxResult {

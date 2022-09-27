@@ -1,7 +1,7 @@
 use crate::cosmos::faucet::discord_message::FaucetTransactionMessage;
 use crate::cosmos::faucet::Faucet;
 use crate::cosmos::tx::discord_message::TransactionDiscordMessage;
-use crate::cosmos::tx::messages::response::{TxResult, TxResponseResult};
+use crate::cosmos::tx::messages::response::{TxResponseResult, TxResult};
 use crate::discord::discord_client::messages::send_msg::SendMessage;
 use actix::Handler;
 use tracing::info;
