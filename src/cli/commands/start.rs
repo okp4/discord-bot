@@ -22,6 +22,7 @@ use crate::{
     },
     discord::discord_server,
 };
+use crate::discord::discord_client::DiscordActor;
 
 #[derive(Command, Debug, Parser)]
 #[clap(arg_required_else_help(true))]
@@ -65,6 +66,8 @@ impl Runnable for StartCmd {
             let sender = Account::new(config.faucet.mnemonic.clone(), &config.chain.prefix)
                 .expect("💀 Cannot create faucet account");
 
+            let addr_discord_client = DiscordActor::new(config.discord.token.to_string()).start();
+
             let addr_cosmos_client = Client::new(APP.config().chain.grpc_address.to_string())
                 .await
                 .map_err(|err| {
@@ -101,6 +104,8 @@ impl Runnable for StartCmd {
                     denom: config.chain.denom.parse().unwrap(),
                 },
                 tx_handler: addr_tx_handler.clone(),
+                discord_client: addr_discord_client,
+                channel_id: config.faucet.channel_id,
             }
             .start();
 
