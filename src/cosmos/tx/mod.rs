@@ -9,7 +9,7 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
-use crate::cosmos::tx::messages::response::TxResponse;
+use crate::cosmos::tx::messages::response::TxResult;
 use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
@@ -22,7 +22,7 @@ use tonic::transport::Channel;
 pub struct TxHandler<T, R>
 where
     T: Msg + Unpin,
-    R: Actor + Handler<TxResponse>,
+    R: Actor + Handler<TxResult>,
 {
     /// Cosmos chain id.
     pub chain_id: String,
@@ -47,7 +47,7 @@ where
 impl<T, R> TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
-    R: Actor + Handler<TxResponse>,
+    R: Actor + Handler<TxResult>,
 {
     /// Create a new TxHandler for a specific message type.
     pub fn new<F>(

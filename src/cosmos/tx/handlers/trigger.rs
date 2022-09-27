@@ -3,7 +3,7 @@
 use crate::cosmos::client::messages::broadcast_tx::{BroadcastTx, BroadcastTxResult};
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
 use crate::cosmos::tx::error::Error;
-use crate::cosmos::tx::messages::response::TxResponse;
+use crate::cosmos::tx::messages::response::TxResult;
 use crate::cosmos::tx::messages::trigger::{TriggerTx, TriggerTxResult};
 use crate::cosmos::tx::TxHandler;
 use actix::dev::ToEnvelope;
@@ -15,8 +15,8 @@ use tracing::log::error;
 impl<T, R> Handler<TriggerTx> for TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
-    R: Actor + Handler<TxResponse>,
-    R::Context: ToEnvelope<R, TxResponse>,
+    R: Actor + Handler<TxResult>,
+    R::Context: ToEnvelope<R, TxResult>,
 {
     type Result = ResponseActFuture<Self, TriggerTxResult>;
 
@@ -79,8 +79,8 @@ where
                     .into_actor(act)
             })
             .map(move |tx_result, _, _| match response_handler {
-                Some(r) => r.do_send(TxResponse {
-                    response: tx_result.and_then(|i| i.map_err(Error::from)),
+                Some(r) => r.do_send(TxResult {
+                    result: tx_result.and_then(|i| i.map_err(Error::from)),
                     subscribers,
                 }),
                 None => info!("📩 Transaction broadcasted"),

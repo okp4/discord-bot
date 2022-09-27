@@ -1,6 +1,6 @@
 //! Message to register response handler.
 
-use crate::cosmos::tx::messages::response::TxResponse;
+use crate::cosmos::tx::messages::response::TxResult;
 use actix::dev::ToEnvelope;
 use actix::{Actor, Addr, Handler, Message};
 
@@ -12,8 +12,8 @@ pub type RegisterResponseHandlerResult = ();
 #[rtype(result = "RegisterResponseHandlerResult")]
 pub struct RegisterResponseHandler<R>
 where
-    R: Actor + Handler<TxResponse>,
-    R::Context: ToEnvelope<R, TxResponse>,
+    R: Actor + Handler<TxResult>,
+    R::Context: ToEnvelope<R, TxResult>,
 {
     /// Address of actor handler that will receive transaction result.
     pub handler: Addr<R>,
