@@ -19,6 +19,9 @@ pub struct DiscordBotConfig {
 
     /// Faucet configuration
     pub faucet: FaucetSection,
+
+    /// Validators configuration
+    pub validators: ValidatorsSection,
 }
 
 /// Discord section.
@@ -161,6 +164,23 @@ impl Default for FaucetSection {
             gas_limit: 200000,
             channel_id: 123456789123,
             explorer_url: None,
+        }
+    }
+}
+
+/// Validators monitoring configuration section
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ValidatorsSection {
+    /// Discord channel ID used for validators status
+    pub channel_id: u64,
+}
+
+
+impl Default for ValidatorsSection {
+    fn default() -> Self {
+        Self {
+            channel_id: 123456789123,
         }
     }
 }

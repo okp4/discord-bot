@@ -1,6 +1,9 @@
 //! Holds CosmosClient library.
 
 use cosmos_sdk_proto::cosmos::auth::v1beta1::query_client::QueryClient as AuthClient;
+use cosmos_sdk_proto::cosmos::staking::v1beta1::query_client::{
+    QueryClient as ValidatorClient, QueryClient,
+};
 use cosmos_sdk_proto::cosmos::tx::v1beta1::service_client::ServiceClient;
 use error::Error;
 use std::fmt::Debug;
@@ -34,6 +37,11 @@ where
     /// return transaction service module endpoint
     pub fn tx(self) -> ServiceClient<T> {
         ServiceClient::new(*self.channel)
+    }
+
+    /// return validator status service module endpoint
+    pub fn validator(self) -> QueryClient<T> {
+        ValidatorClient::new(*self.channel)
     }
 }
 
