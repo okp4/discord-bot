@@ -22,6 +22,7 @@ use crate::{
     },
     discord::discord_server,
 };
+use crate::cosmos::validators::Validators;
 
 #[derive(clap::Parser, Command, Debug)]
 #[command(arg_required_else_help(true))]
@@ -73,6 +74,13 @@ impl Runnable for StartCmd {
                     error!("💀 Cosmos GRPC client error: {:?}", err);
                 })
                 .unwrap()
+                .start();
+
+            let addr_validators = Validators::new(
+                config.validators.channel_id.clone(),
+                addr_cosmos_client.clone(),
+                addr_discord_client.clone(),
+            )
                 .start();
 
             let addr_tx_handler = TxHandler::<MsgSend, Faucet>::new(
