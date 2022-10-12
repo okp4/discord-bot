@@ -1,9 +1,8 @@
-use actix::{AsyncContext, ContextFutureSpawner, Handler, MailboxError, WrapFuture};
+use actix::{AsyncContext, ContextFutureSpawner, Handler, WrapFuture};
+use cosmos_sdk_proto::cosmos::staking::v1beta1::BondStatus;
 use tracing::info;
 
-use crate::cosmos::client::messages::validators_status::{
-    GetValidatorsStatus, GetValidatorsStatusResult,
-};
+use crate::cosmos::client::messages::validators_status::GetValidatorsStatus;
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::validators::Validators;
 use crate::cosmos::validators::messages::get_state_message::GetStateMessage;
@@ -23,32 +22,33 @@ impl Handler<GetStateMessage> for Validators {
         let self_address = ctx.address().clone();
 
         async move {
-            let result: Result<GetValidatorsStatusResult, MailboxError> =
-                grpc_client.send(GetValidatorsStatus {}).await;
-            let _ = result.map_err(Error::from).and_then(|response| {
-                Ok({
-                    response
-                        .map_err(Error::from)
-                        .and_then(|res| Ok(res.validators))
-                        .and_then(|validator_state| {
-                            for message in Validators::compute_discord_message(
-                                &validators_current_state,
-                                &validator_state,
-                            ) {
-                                discord_client.do_send(SendMessage {
-                                    description: message,
+            for status in [BondStatus::Unbonded, BondStatus::Bonded, BondStatus::Unbonding] {
+                let _ = grpc_client.send(GetValidatorsStatus { status }).await
+                    .map_err(Error::from).and_then(|response| {
+                    Ok({
+                        response
+                            .map_err(Error::from)
+                            .and_then(|res| Ok(res.validators))
+                            .and_then(|validator_state| {
+                                for message in Validators::compute_discord_message(
+                                    &validators_current_state,
+                                    &validator_state,
+                                ) {
+                                    discord_client.do_send(SendMessage {
+                                        description: message,
                                         title: "Validator state".to_string(),
                                         content: "".to_string(),
                                         channel_id,
+                                    });
+                                }
+                                self_address.do_send(UpdateStateMessage {
+                                    validators: validator_state.clone()
                                 });
-                            }
-                            self_address.do_send(UpdateStateMessage {
-                                validators: validator_state.clone()
-                            });
-                            Ok({})
-                        })
-                })
-            });
+                                Ok({})
+                            })
+                    })
+                });
+            }
         }
             .into_actor(self).wait(ctx);
     }
