@@ -12,14 +12,14 @@ use crate::cosmos::client::Client;
 impl Handler<GetValidatorsStatus> for Client<Channel> {
     type Result = ResponseFuture<GetValidatorsStatusResult>;
 
-    fn handle(&mut self, _msg: GetValidatorsStatus, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: GetValidatorsStatus, _ctx: &mut Self::Context) -> Self::Result {
         let mut validator_client = self.clone().validator();
         Box::pin(async move {
-            info!("handle get validators status request");
+            info!("handle get validators status request {}", msg.status.as_str_name());
 
             let response = validator_client
                 .validators(tonic::Request::new(QueryValidatorsRequest {
-                    status: "BOND_STATUS_BONDED".to_string(),
+                    status: msg.status.as_str_name().parse().unwrap(),
                     pagination: None,
                 }))
                 .await
