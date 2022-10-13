@@ -46,28 +46,25 @@ impl Validators {
     ) -> Vec<String> {
         let mut messages: Vec<String> = vec![];
 
-        for validator in current_validator_state {
-            if !new_validator_state.contains(&validator) {
-                messages.push(format!("💀 Lost validator: {}", validator.operator_address));
-            }
-        }
-
         for validator in new_validator_state {
+            let name_to_display = validator.description.as_ref().map_or_else(|| validator.operator_address.clone(),
+                                                                             |d| d.moniker.clone());
+
             if !current_validator_state.contains(validator) {
-                messages.push(format!("🎉 New validator: {}", validator.operator_address));
+                messages.push(format!("🎉 New validator: {}", name_to_display));
             } else {
                 let old_state = current_validator_state.iter().find(|v|
                     (**v).eq(validator)
                 );
                 match old_state {
                     None => {
-                        error!("Should have found {}, in current state", validator.operator_address);
+                        error!("Should have found {}, in current state", name_to_display);
                     }
                     Some(old_state) => {
                         if validator.jailed && !old_state.jailed {
-                            messages.push(format!("🚓 Jailed validator {}", validator.operator_address));
+                            messages.push(format!("🚓 Jailed validator {}", name_to_display));
                         } else if !validator.jailed && old_state.jailed {
-                            messages.push(format!("🏁 {} is out of jail\nWelcome back!", validator.operator_address));
+                            messages.push(format!("🏁 {} is out of jail\nWelcome back!", name_to_display));
                         }
                     }
                 }
