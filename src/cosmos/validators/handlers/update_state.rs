@@ -1,5 +1,5 @@
 use actix::Handler;
-use tracing::{debug, info};
+use tracing::debug;
 
 use crate::cosmos::validators::messages::update_state_message::UpdateStateMessage;
 use crate::cosmos::validators::Validators;
