@@ -3,7 +3,6 @@
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::Validator;
 use tonic::transport::Channel;
-use tracing::error;
 
 use crate::cosmos::client::Client;
 use crate::discord::discord_client::DiscordActor;
@@ -63,10 +62,23 @@ impl Validators {
                     } else if !validator.jailed && old_state.jailed {
                         messages.push(format!("🏁 {} is out of jail\nWelcome back!", name_to_display));
                     }
+
+                    if validator.status != old_state.status {
+                        messages.push(format!("⚠️ {} status changed : {} ➡️ {}", name_to_display, get_status_txt(old_state.status), get_status_txt(validator.status)));
+                    }
                 }
             }
         }
 
         messages
+    }
+}
+
+fn get_status_txt(value: i32) -> String {
+    match value {
+        1 => "unbonded".to_string(),
+        2 => "unbonding".to_string(),
+        3 => "bonded".to_string(),
+        _ => "Unspecified".to_string(),
     }
 }
