@@ -15,7 +15,10 @@ impl Handler<GetValidatorsStatus> for Client<Channel> {
     fn handle(&mut self, msg: GetValidatorsStatus, _ctx: &mut Self::Context) -> Self::Result {
         let mut validator_client = self.clone().validator();
         Box::pin(async move {
-            info!("handle get validators status request {}", msg.status.as_str_name());
+            info!(
+                "handle get validators status request {}",
+                msg.status.as_str_name()
+            );
 
             let response = validator_client
                 .validators(tonic::Request::new(QueryValidatorsRequest {

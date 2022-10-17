@@ -56,18 +56,18 @@ impl Validators {
     }
 
     fn compute_discord_message(
-        current_validator_state: &Vec<Validator>,
-        new_validator_state: &Vec<Validator>,
+        current_validator_state: &[Validator],
+        new_validator_state: &[Validator],
     ) -> Vec<String> {
         let mut messages: Vec<String> = vec![];
 
         for validator in new_validator_state {
-            let name_to_display = validator.description.as_ref().map_or_else(|| validator.operator_address.clone(),
-                                                                             |d| d.moniker.clone());
+            let name_to_display = validator
+                .description
+                .as_ref()
+                .map_or_else(|| validator.operator_address.clone(), |d| d.moniker.clone());
 
-            let old_state = current_validator_state.iter().find(|v|
-                (**v).eq(validator)
-            );
+            let old_state = current_validator_state.iter().find(|v| (**v).eq(validator));
             match old_state {
                 None => {
                     messages.push(msg_to_str(Message::NewValidator, name_to_display.clone()));
@@ -80,10 +80,12 @@ impl Validators {
                     }
 
                     if validator.status != old_state.status {
-                        messages.push(format!("{} {} ➡️ {}",
-                                              msg_to_str(Message::ChangedStatus, name_to_display.clone()),
-                                              get_status_txt(old_state.status),
-                                              get_status_txt(validator.status)));
+                        messages.push(format!(
+                            "{} {} ➡️ {}",
+                            msg_to_str(Message::ChangedStatus, name_to_display.clone()),
+                            get_status_txt(old_state.status),
+                            get_status_txt(validator.status)
+                        ));
                     }
                 }
             }
