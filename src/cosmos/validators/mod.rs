@@ -24,6 +24,22 @@ pub struct Validators {
     validators_current: Vec<Validator>,
 }
 
+enum Message {
+    Jailed,
+    Unjailed,
+    ChangedStatus,
+    NewValidator,
+}
+
+fn msg_to_str(msg: Message, subject: String) -> String {
+    match msg {
+        Message::Jailed => format!("🚓 Jailed validator {}", subject),
+        Message::Unjailed => format!("🏁 {} is out of jail\nWelcome back!", subject),
+        Message::ChangedStatus => format!("⚠️ {} status changed : ", subject),
+        Message::NewValidator => format!("🎉 New validator: {}", subject),
+    }
+}
+
 impl Validators {
     /// Create a new validators actor client
     pub fn new(
@@ -54,17 +70,20 @@ impl Validators {
             );
             match old_state {
                 None => {
-                    messages.push(format!("🎉 New validator: {}", name_to_display));
+                    messages.push(msg_to_str(Message::NewValidator, name_to_display.clone()));
                 }
                 Some(old_state) => {
                     if validator.jailed && !old_state.jailed {
-                        messages.push(format!("🚓 Jailed validator {}", name_to_display));
+                        messages.push(msg_to_str(Message::Jailed, name_to_display.clone()));
                     } else if !validator.jailed && old_state.jailed {
-                        messages.push(format!("🏁 {} is out of jail\nWelcome back!", name_to_display));
+                        messages.push(msg_to_str(Message::Unjailed, name_to_display.clone()));
                     }
 
                     if validator.status != old_state.status {
-                        messages.push(format!("⚠️ {} status changed : {} ➡️ {}", name_to_display, get_status_txt(old_state.status), get_status_txt(validator.status)));
+                        messages.push(format!("{} {} ➡️ {}",
+                                              msg_to_str(Message::ChangedStatus, name_to_display.clone()),
+                                              get_status_txt(old_state.status),
+                                              get_status_txt(validator.status)));
                     }
                 }
             }
