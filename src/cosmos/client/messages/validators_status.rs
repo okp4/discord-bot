@@ -13,5 +13,5 @@ pub type GetValidatorsStatusResult = Result<QueryValidatorsResponse, Error>;
 #[rtype(result = "GetValidatorsStatusResult")]
 pub struct GetValidatorsStatus {
     /// status has to be specified
-    pub status: BondStatus
+    pub status: BondStatus,
 }

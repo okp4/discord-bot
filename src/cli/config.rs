@@ -176,7 +176,6 @@ pub struct ValidatorsSection {
     pub channel_id: u64,
 }
 
-
 impl Default for ValidatorsSection {
     fn default() -> Self {
         Self {

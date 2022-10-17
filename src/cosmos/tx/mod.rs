@@ -9,6 +9,7 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
+use crate::cosmos::validators::Validators;
 use crate::cosmos::tx::messages::response::TxResult;
 use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
@@ -18,7 +19,6 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tonic::transport::Channel;
-use crate::cosmos::validators::Validators;
 
 /// Actor that will manage all transaction to the cosmos blockchain
 /// Each transaction will be trigger each X seconds.

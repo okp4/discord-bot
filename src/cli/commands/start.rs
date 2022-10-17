@@ -9,6 +9,7 @@ use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
 
 use crate::cosmos::tx::messages::register_handler::RegisterResponseHandler;
+use crate::cosmos::validators::Validators;
 use crate::discord::discord_client::DiscordActor;
 use crate::{
     cli::{
@@ -22,7 +23,6 @@ use crate::{
     },
     discord::discord_server,
 };
-use crate::cosmos::validators::Validators;
 
 #[derive(clap::Parser, Command, Debug)]
 #[command(arg_required_else_help(true))]
@@ -76,12 +76,12 @@ impl Runnable for StartCmd {
                 .unwrap()
                 .start();
 
-            let addr_validators = Validators::new(
-                config.validators.channel_id.clone(),
+            let _addr_validators = Validators::new(
+                config.validators.channel_id,
                 addr_cosmos_client.clone(),
                 addr_discord_client.clone(),
             )
-                .start();
+            .start();
 
             let addr_tx_handler = TxHandler::<MsgSend, Faucet>::new(
                 config.chain.chain_id.to_string(),

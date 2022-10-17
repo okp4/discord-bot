@@ -4,9 +4,9 @@ use tracing::info;
 
 use crate::cosmos::client::messages::validators_status::GetValidatorsStatus;
 use crate::cosmos::tx::error::Error;
-use crate::cosmos::validators::Validators;
 use crate::cosmos::validators::messages::get_state_message::GetStateMessage;
 use crate::cosmos::validators::messages::update_state_message::UpdateStateMessage;
+use crate::cosmos::validators::Validators;
 use crate::discord::discord_client::messages::send_msg::SendMessage;
 
 impl Handler<GetStateMessage> for Validators {
@@ -17,19 +17,23 @@ impl Handler<GetStateMessage> for Validators {
 
         let grpc_client = self.grpc_client.clone();
         let discord_client = self.discord_client.clone();
-        let channel_id = self.channel_id.clone();
+        let channel_id = self.channel_id;
         let validators_current_state = self.validators_current.clone();
-        let self_address = ctx.address().clone();
+        let self_address = ctx.address();
 
         async move {
-            for status in [BondStatus::Unbonded, BondStatus::Bonded, BondStatus::Unbonding] {
-                let _ = grpc_client.send(GetValidatorsStatus { status }).await
-                    .map_err(Error::from).and_then(|response| {
-                    Ok({
-                        response
-                            .map_err(Error::from)
-                            .and_then(|res| Ok(res.validators))
-                            .and_then(|validator_state| {
+            for status in [
+                BondStatus::Unbonded,
+                BondStatus::Bonded,
+                BondStatus::Unbonding,
+            ] {
+                let _ = grpc_client
+                    .send(GetValidatorsStatus { status })
+                    .await
+                    .map_err(Error::from)
+                    .map(|response| {
+                        response.map_err(Error::from).map(|res| res.validators).map(
+                            |validator_state| {
                                 for message in Validators::compute_discord_message(
                                     &validators_current_state,
                                     &validator_state,
@@ -42,14 +46,14 @@ impl Handler<GetStateMessage> for Validators {
                                     });
                                 }
                                 self_address.do_send(UpdateStateMessage {
-                                    validators: validator_state.clone()
+                                    validators: validator_state,
                                 });
-                                Ok({})
-                            })
-                    })
-                });
+                            },
+                        )
+                    });
             }
         }
-            .into_actor(self).wait(ctx);
+        .into_actor(self)
+        .wait(ctx);
     }
 }
