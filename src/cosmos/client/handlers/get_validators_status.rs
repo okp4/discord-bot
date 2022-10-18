@@ -2,7 +2,7 @@ use actix::prelude::*;
 use actix::Handler;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::QueryValidatorsRequest;
 use tonic::transport::Channel;
-use tracing::{error, info};
+use tracing::{debug, error};
 
 use crate::cosmos::client::messages::validators_status::{
     GetValidatorsStatus, GetValidatorsStatusResult,
@@ -15,7 +15,7 @@ impl Handler<GetValidatorsStatus> for Client<Channel> {
     fn handle(&mut self, msg: GetValidatorsStatus, _ctx: &mut Self::Context) -> Self::Result {
         let mut validator_client = self.clone().validator();
         Box::pin(async move {
-            info!(
+            debug!(
                 "handle get validators status request {}",
                 msg.status.as_str_name()
             );
