@@ -33,7 +33,7 @@ pub struct StartCmd {
     #[clap(short = 'g', long = "guild-id")]
     guild_id: Option<u64>,
 
-    /// Configure the faucet mnemonic in order to send to token from this address.
+    /// Configure the faucet mnemonic in order to send tokens from this address.
     #[clap(short = 'm', long = "mnemonic")]
     mnemonic: Option<String>,
 
