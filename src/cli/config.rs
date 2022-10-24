@@ -118,7 +118,7 @@ impl Default for ChainSection {
 
 /// Faucet configuration section
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct FaucetSection {
     /// The sender mnemonic.
     pub mnemonic: String,

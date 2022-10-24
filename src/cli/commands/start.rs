@@ -33,6 +33,10 @@ pub struct StartCmd {
     #[clap(short = 'g', long = "guild-id")]
     guild_id: Option<u64>,
 
+    /// Configure the faucet mnemonic in order to send tokens from this address.
+    #[clap(short = 'm', long = "mnemonic")]
+    mnemonic: Option<String>,
+
     /// The shard index ID to start.
     /// Establish a sharded connection and start listening for events.
     /// This will start receiving events and dispatch them to your registered handlers.
@@ -140,6 +144,10 @@ impl config::Override<DiscordBotConfig> for StartCmd {
 
         if let Some(guild_id) = self.guild_id {
             config.discord.guild_id = guild_id
+        }
+
+        if let Some(mnemonic) = self.mnemonic.clone() {
+            config.faucet.mnemonic = mnemonic
         }
 
         match (self.shard, self.shards) {
