@@ -24,4 +24,6 @@ pub struct Faucet {
     pub discord_client: Addr<DiscordActor>,
     /// The discord channel id where the transaction result should be posted
     pub channel_id: u64,
+    /// Set the explorer url template to add link on the discord message.
+    pub explorer_url: Option<String>,
 }

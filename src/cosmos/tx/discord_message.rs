@@ -11,5 +11,6 @@ pub trait TransactionDiscordMessage {
         tx_response: Result<TxResponse, TxError>,
         subscribers: Vec<User>,
         channel_id: u64,
+        explore_url: Option<String>,
     ) -> Self;
 }

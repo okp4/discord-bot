@@ -108,6 +108,7 @@ impl Runnable for StartCmd {
                 tx_handler: addr_tx_handler.clone(),
                 discord_client: addr_discord_client,
                 channel_id: config.faucet.channel_id,
+                explorer_url: config.faucet.explorer_url.to_owned(),
             }
             .start();
 

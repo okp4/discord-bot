@@ -146,6 +146,9 @@ pub struct FaucetSection {
 
     /// Discord channel ID used for transactions feedback
     pub channel_id: u64,
+
+    /// Set the explorer url template
+    pub explorer_url: Option<String>,
 }
 
 impl Default for FaucetSection {
@@ -157,6 +160,7 @@ impl Default for FaucetSection {
             memo: "Sent by økp4 discord bot".to_string(),
             gas_limit: 200000,
             channel_id: 123456789123,
+            explorer_url: None,
         }
     }
 }

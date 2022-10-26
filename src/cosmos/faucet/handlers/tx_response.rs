@@ -11,8 +11,12 @@ impl Handler<TxResult> for Faucet {
 
     fn handle(&mut self, msg: TxResult, _: &mut Self::Context) -> Self::Result {
         info!("📝 Receive transaction result on faucet.");
-        let message =
-            FaucetTransactionMessage::build_message(msg.result, msg.subscribers, self.channel_id);
+        let message = FaucetTransactionMessage::build_message(
+            msg.result,
+            msg.subscribers,
+            self.channel_id,
+            self.explorer_url.clone(),
+        );
         self.discord_client.do_send(SendMessage { message });
     }
 }
