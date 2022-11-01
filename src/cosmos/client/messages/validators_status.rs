@@ -12,6 +12,9 @@ pub type GetValidatorsStatusResult = Result<QueryValidatorsResponse, Error>;
 #[derive(Message)]
 #[rtype(result = "GetValidatorsStatusResult")]
 pub struct GetValidatorsStatus {
-    /// status has to be specified
+    /// Status has to be specified
     pub status: BondStatus,
+
+    /// Pagination key
+    pub pagination_next_key: Vec<u8>,
 }
