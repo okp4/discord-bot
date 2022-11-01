@@ -3,6 +3,7 @@
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::Validator;
 use tonic::transport::Channel;
+use tracing::debug;
 
 use crate::cosmos::client::Client;
 use crate::discord::discord_client::DiscordActor;
@@ -28,7 +29,6 @@ enum Message {
     Jailed,
     Unjailed,
     ChangedStatus,
-    NewValidator,
 }
 
 fn msg_to_str(msg: Message, subject: String) -> String {
@@ -36,7 +36,6 @@ fn msg_to_str(msg: Message, subject: String) -> String {
         Message::Jailed => format!("🚓 Jailed validator {}", subject),
         Message::Unjailed => format!("🏁 {} is out of jail\nWelcome back!", subject),
         Message::ChangedStatus => format!("⚠️ {} status changed : ", subject),
-        Message::NewValidator => format!("🎉 New validator: {}", subject),
     }
 }
 
@@ -70,7 +69,7 @@ impl Validators {
             let old_state = current_validator_state.iter().find(|v| (**v).eq(validator));
             match old_state {
                 None => {
-                    messages.push(msg_to_str(Message::NewValidator, name_to_display.clone()));
+                    debug!("New validator : {}", name_to_display.clone())
                 }
                 Some(old_state) => {
                     if validator.jailed && !old_state.jailed {
