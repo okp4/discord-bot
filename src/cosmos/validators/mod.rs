@@ -96,9 +96,9 @@ impl Validators {
 
 fn get_status_txt(value: i32) -> String {
     match value {
-        1 => "unbonded".to_string(),
-        2 => "unbonding".to_string(),
-        3 => "bonded".to_string(),
-        _ => "Unspecified".to_string(),
+        1 => "unbonded 💤".to_string(),
+        2 => "unbonding ⏲️".to_string(),
+        3 => "bonded 🛤️".to_string(),
+        _ => "Unspecified ⁉️".to_string(),
     }
 }
