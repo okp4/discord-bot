@@ -1,5 +1,5 @@
 #--- Build stage
-FROM clux/muslrust:1.63.0-stable as builder
+FROM clux/muslrust:1.64.0-stable as builder
 
 WORKDIR /app
 
