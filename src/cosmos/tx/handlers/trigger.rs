@@ -74,22 +74,24 @@ where
                     };
                     result
                 }
-                .into_actor(act)
+                    .into_actor(act)
             })
             .map(move |tx_result, act, _| {
                 match tx_result.and_then(|i| i.map_err(Error::from)) {
                     Ok(tx_response) => {
                         info!(
-                            "Transaction successfully broadcasted : {}",
-                            tx_response.txhash
-                        );
-                        match act.channel_id {
-                            Some(channel_id) => discord_client.do_send(SendMessage {
+                        "Transaction successfully broadcasted : {}",
+                        tx_response.txhash
+                    );
+                    act.channel_id.map_or_else(
+                        || error!("No channel id to send the message to"),
+                        |channel_id| {
+                            discord_client.do_send(SendMessage {
                                 title: String::from("🚀 Transaction broadcasted!"),
                                 description: format!(
                                     "\t- 🤝 Transaction hash: {}
-                            \t- ⚙️ Result code : {}
-                            \t- ⛽️ Gas used: {}",
+                                    \t- ⚙️ Result code : {}
+                                    \t- ⛽️ Gas used: {}",
                                     tx_response.txhash, tx_response.code, tx_response.gas_used
                                 ),
                                 content: {
@@ -103,30 +105,31 @@ where
                                     str
                                 },
                                 channel_id,
-                            }),
-                            None => {}
-                        };
+                            })
+                        })
                     }
                     Err(why) => {
                         error!("❌ Failed sign transaction {}", why);
-                         match act.channel_id {
-                            Some(channel_id) => discord_client.do_send(SendMessage {
-                                title: String::from("🤷 So sorry, something went wrong"),
-                                description: String::from("You're request was not processed.\nThe transaction was not broadcasted."),
-                                content: {
-                                    let mut str = String::new();
-                                    for sub in subscribers {
-                                        str.push_str(
-                                            &format_args!("{member} ", member = &sub.mention())
-                                                .to_string(),
-                                        );
-                                    }
-                                    str
-                                },
-                                channel_id,
-                            }),
-                            None => {}
-                        };
+                        act.channel_id.map_or_else(
+                            || error!("No channel id to send the message to"),
+                            |channel_id| {
+                                discord_client.do_send(SendMessage {
+                                    title: String::from("🤷 So sorry, something went wrong"),
+                                    description: String::from("You're request was not processed.\nThe transaction was not broadcasted."),
+                                    content: {
+                                        let mut str = String::new();
+                                        for sub in subscribers {
+                                            str.push_str(
+                                                &format_args!("{member} ", member = &sub.mention())
+                                                    .to_string(),
+                                            );
+                                        }
+                                        str
+                                    },
+                                    channel_id,
+                                });
+                            },
+                        );
                     }
                 }
             }),
