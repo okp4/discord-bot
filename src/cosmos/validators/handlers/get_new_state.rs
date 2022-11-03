@@ -26,7 +26,7 @@ impl Handler<GetStateMessage> for Validators {
         let self_address = ctx.address();
 
         async move {
-            let pagination_next_key: Vec<u8> = msg.pagination_key.unwrap_or(vec![]);
+            let pagination_next_key: Vec<u8> = msg.pagination_key.unwrap_or_default();
 
             let _ = grpc_client
                 .send(GetValidatorsStatus {
@@ -58,7 +58,7 @@ impl Handler<GetStateMessage> for Validators {
                             match res.pagination {
                                 None => debug!("pagination finished"),
                                 Some(x) => {
-                                    if x.next_key.len() > 0 {
+                                    if !x.next_key.is_empty() {
                                         self_address.do_send(GetStateMessage {
                                             bond_status: msg.bond_status,
                                             pagination_key: Option::from(x.next_key),
