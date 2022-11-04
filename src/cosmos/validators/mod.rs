@@ -66,7 +66,10 @@ impl Validators {
                 .as_ref()
                 .map_or_else(|| validator.operator_address.clone(), |d| d.moniker.clone());
 
-            let old_state = current_validator_state.iter().find(|v| (**v).eq(validator));
+            let old_state = current_validator_state.iter().find(|v| {
+                ((**v).operator_address.clone().as_str())
+                    .eq(validator.operator_address.clone().as_str())
+            });
             match old_state {
                 None => {
                     debug!("New validator : {}", name_to_display.clone())
