@@ -1,4 +1,4 @@
-//! Holds all the validator actor configuration
+//! Holds all the validators actor configuration
 
 use actix::Addr;
 use cosmos_sdk_proto::cosmos::staking::v1beta1::Validator;
@@ -28,14 +28,16 @@ pub struct Validators {
 enum Message {
     Jailed,
     Unjailed,
-    ChangedStatus,
+    Inactive,
+    Active,
 }
 
 fn msg_to_str(msg: Message, subject: String) -> String {
     match msg {
-        Message::Jailed => format!("🚓 Jailed validator {}", subject),
-        Message::Unjailed => format!("🏁 {} is out of jail\nWelcome back!", subject),
-        Message::ChangedStatus => format!("⚠️ {} status changed : ", subject),
+        Message::Jailed => format!("🚓 Jailed validator : `{}`", subject),
+        Message::Unjailed => format!("🏁 `{}` is out of jail\nWelcome back!", subject),
+        Message::Inactive => format!("😵 `{}` is inactive", subject),
+        Message::Active => format!("🥳 {} is active", subject),
     }
 }
 
@@ -82,26 +84,15 @@ impl Validators {
                     }
 
                     if validator.status != old_state.status {
-                        messages.push(format!(
-                            "{} {} ➡️ {}",
-                            msg_to_str(Message::ChangedStatus, name_to_display.clone()),
-                            get_status_txt(old_state.status),
-                            get_status_txt(validator.status)
-                        ));
+                        if validator.status == 3 {
+                            messages.push(msg_to_str(Message::Active, name_to_display.clone()));
+                        } else {
+                            messages.push(msg_to_str(Message::Inactive, name_to_display.clone()));
+                        }
                     }
                 }
             }
         }
-
         messages
-    }
-}
-
-fn get_status_txt(value: i32) -> String {
-    match value {
-        1 => "unbonded 💤".to_string(),
-        2 => "unbonding ⏲️".to_string(),
-        3 => "bonded 🛤️".to_string(),
-        _ => "Unspecified ⁉️".to_string(),
     }
 }
