@@ -6,7 +6,7 @@ license-file = "LICENSE"
 name = "discord_bot"
 readme = "README.md"
 repository = "https://github.com/okp4/discord-bot"
-rust-version = "1.64"
+rust-version = "1.65"
 version = "0.1.0"
 
 [dependencies]
