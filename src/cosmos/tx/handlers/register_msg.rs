@@ -1,13 +1,17 @@
 //! Register transaction handler
 
-use crate::cosmos::tx::messages::register::{RegisterMsg, RegisterMsgResult};
+use crate::cosmos::tx::messages::register_msg::{RegisterMsg, RegisterMsgResult};
+use crate::cosmos::tx::messages::response::TxResult;
 use crate::cosmos::tx::TxHandler;
-use actix::Handler;
+use actix::dev::ToEnvelope;
+use actix::{Actor, Handler};
 use cosmrs::tx::Msg;
 
-impl<T> Handler<RegisterMsg<T>> for TxHandler<T>
+impl<T, R> Handler<RegisterMsg<T>> for TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
+    R: Actor + Handler<TxResult>,
+    R::Context: ToEnvelope<R, TxResult>,
 {
     type Result = RegisterMsgResult;
 

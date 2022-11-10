@@ -2,6 +2,7 @@
 
 mod actor;
 mod handlers;
+pub mod message;
 pub mod messages;
 
 /// Discord actor client

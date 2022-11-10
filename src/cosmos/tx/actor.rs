@@ -1,12 +1,16 @@
+use crate::cosmos::tx::messages::response::TxResult;
 use crate::cosmos::tx::messages::trigger::TriggerTx;
 use crate::cosmos::tx::TxHandler;
-use actix::{Actor, AsyncContext, Context};
+use actix::dev::ToEnvelope;
+use actix::{Actor, AsyncContext, Context, Handler};
 use cosmrs::tx::Msg;
 use tracing::info;
 
-impl<T> Actor for TxHandler<T>
+impl<T, R> Actor for TxHandler<T, R>
 where
     T: Msg + Unpin + 'static,
+    R: Actor + Handler<TxResult>,
+    R::Context: ToEnvelope<R, TxResult>,
 {
     type Context = Context<Self>;
 
