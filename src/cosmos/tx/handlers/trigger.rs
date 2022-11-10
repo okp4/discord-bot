@@ -23,7 +23,10 @@ where
     type Result = ResponseActFuture<Self, TriggerTxResult>;
 
     fn handle(&mut self, msg: TriggerTx, _ctx: &mut Self::Context) -> Self::Result {
-        let mut msgs_queue = self.msgs_queue.lock().unwrap();
+        let Ok(mut msgs_queue) = self.msgs_queue.lock() else {
+            error!("❌ Failed lock msgs queue, request fund couldn't be registered.");
+            return Box::pin(async {}.into_actor(self));
+        };
         let msgs_queue_len = msgs_queue.len();
 
         if msgs_queue.is_empty() {

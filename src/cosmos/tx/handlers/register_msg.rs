@@ -6,7 +6,7 @@ use crate::cosmos::tx::TxHandler;
 use actix::dev::ToEnvelope;
 use actix::{Actor, Handler};
 use cosmrs::tx::Msg;
-use tracing::info;
+use tracing::{error, info};
 
 impl<T, R> Handler<RegisterMsg<T>> for TxHandler<T, R>
 where
@@ -17,7 +17,10 @@ where
     type Result = RegisterMsgResult;
 
     fn handle(&mut self, msg: RegisterMsg<T>, _: &mut Self::Context) -> Self::Result {
-        let mut msgs = self.msgs_queue.lock().unwrap();
+        let Ok(mut msgs) = self.msgs_queue.lock() else {
+            error!("❌ Failed lock msgs queue, request fund couldn't be registered.");
+            return
+        };
         if msgs.iter().find(|f| f.0.id == msg.subscriber.id) == None {
             info!("🤑 Register transaction for {}", msg.subscriber.name);
             msgs.push_back((msg.subscriber, msg.msg));
