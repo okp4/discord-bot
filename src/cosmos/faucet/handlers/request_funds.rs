@@ -16,7 +16,7 @@ impl Handler<RequestFunds> for Faucet {
         };
 
         self.tx_handler
-            .do_send(RegisterMsg::new(msg_send, Some(msg.requester)));
+            .do_send(RegisterMsg::new(msg_send, msg.requester));
 
         info!("✍️  Register request funds for {}", msg.address);
     }

@@ -6,6 +6,7 @@ pub mod error;
 pub mod handlers;
 pub mod messages;
 
+use std::collections::VecDeque;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
@@ -35,9 +36,7 @@ where
     /// Duration between two transactions.
     pub batch_window: Duration,
     /// Contains the batch of transaction message to sent as prost::Any.
-    msgs: Vec<T>,
-    /// Contains the list of all user that request transaction.
-    subscribers: Vec<User>,
+    msgs: VecDeque<(User, T)>,
     /// GRPC client to send transaction.
     grpc_client: Addr<Client<Channel>>,
     /// Hold address of actor that will receive message when a transaction has been broadcasted.
@@ -66,8 +65,7 @@ where
             memo: "".to_string(),
             fee,
             batch_window: Duration::new(8, 0),
-            msgs: vec![],
-            subscribers: vec![],
+            msgs: VecDeque::new(),
             grpc_client,
             response_handler: None,
         };

@@ -16,9 +16,6 @@ where
     type Result = RegisterMsgResult;
 
     fn handle(&mut self, msg: RegisterMsg<T>, _: &mut Self::Context) -> Self::Result {
-        if msg.subscriber.is_some() {
-            self.subscribers.push(msg.subscriber.unwrap())
-        }
-        self.msgs.push(msg.msg);
+        self.msgs.push_back((msg.subscriber, msg.msg));
     }
 }

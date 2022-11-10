@@ -18,7 +18,7 @@ where
     pub msg: T,
 
     /// Transaction subscriber
-    pub subscriber: Option<User>,
+    pub subscriber: User,
 }
 
 impl<T> RegisterMsg<T>
@@ -26,7 +26,7 @@ where
     T: Msg,
 {
     /// Create a new RegisterMsg.
-    pub fn new(msg: T, subscriber: Option<User>) -> Self
+    pub fn new(msg: T, subscriber: User) -> Self
     where
         T: Msg,
     {

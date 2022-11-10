@@ -1,5 +1,7 @@
 //! Trigger transaction handler
 
+use std::cmp::min;
+use std::collections::VecDeque;
 use crate::cosmos::client::messages::broadcast_tx::{BroadcastTx, BroadcastTxResult};
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
 use crate::cosmos::tx::error::Error;
@@ -9,6 +11,7 @@ use crate::cosmos::tx::TxHandler;
 use actix::dev::ToEnvelope;
 use actix::{Actor, ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Msg};
+use serenity::model::user::User;
 use tracing::info;
 use tracing::log::error;
 
@@ -26,10 +29,10 @@ where
             return Box::pin(async {}.into_actor(self));
         }
 
-        let msgs = self.msgs.clone();
-        let subscribers = self.subscribers.clone();
-        self.msgs.clear();
-        self.subscribers.clear();
+        let (subscribers, msgs): (Vec<User>, Vec<T>) = self.msgs
+            .drain(..min(self.msgs.len(),2))
+            .map(|it| (it.0, it.1))
+            .unzip();
 
         let grpc_client = self.grpc_client.clone();
         let sender_address = self.sender.address.to_string();
