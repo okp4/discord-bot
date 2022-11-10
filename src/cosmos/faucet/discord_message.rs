@@ -86,7 +86,7 @@ impl DiscordMessage for FaucetTransactionMessage {
     async fn send_message(self, http: &Http) -> Result<Message, Error> {
         ChannelId(self.channel_id)
             .send_message(&http, |m| {
-                m.content(self.content).tts(true);
+                m.content(self.content);
                 if !self.title.is_empty() || !self.description.is_empty() {
                     m.embed(|e| {
                         if !self.title.is_empty() {
