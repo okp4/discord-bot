@@ -6,15 +6,16 @@ pub mod error;
 pub mod handlers;
 pub mod messages;
 
-use std::collections::VecDeque;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::response::TxResult;
 use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
+use cosmrs::bip32::secp256k1::sha2::digest::typenum::UInt;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use serenity::model::user::User;
+use std::collections::VecDeque;
 use std::time::Duration;
 use tonic::transport::Channel;
 
@@ -35,6 +36,8 @@ where
     pub fee: Fee,
     /// Duration between two transactions.
     pub batch_window: Duration,
+    /// Number of max message per transactions
+    pub max_msg: usize,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs: VecDeque<(User, T)>,
     /// GRPC client to send transaction.
@@ -65,6 +68,7 @@ where
             memo: "".to_string(),
             fee,
             batch_window: Duration::new(8, 0),
+            max_msg: 7,
             msgs: VecDeque::new(),
             grpc_client,
             response_handler: None,

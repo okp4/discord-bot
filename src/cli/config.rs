@@ -102,6 +102,9 @@ pub struct ChainSection {
 
     /// Duration between two transaction batch.
     pub batch_transaction_window: Duration,
+
+    /// Configure the maximum
+    pub max_msg: usize,
 }
 
 impl Default for ChainSection {
@@ -112,6 +115,7 @@ impl Default for ChainSection {
             denom: "know".to_string(),
             prefix: "okp4".to_string(),
             batch_transaction_window: Duration::from_secs(8),
+            max_msg: 7,
         }
     }
 }

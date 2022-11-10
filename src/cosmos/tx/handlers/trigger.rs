@@ -1,7 +1,5 @@
 //! Trigger transaction handler
 
-use std::cmp::min;
-use std::collections::VecDeque;
 use crate::cosmos::client::messages::broadcast_tx::{BroadcastTx, BroadcastTxResult};
 use crate::cosmos::client::messages::get_account::{GetAccount, GetAccountResult};
 use crate::cosmos::tx::error::Error;
@@ -12,6 +10,8 @@ use actix::dev::ToEnvelope;
 use actix::{Actor, ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Msg};
 use serenity::model::user::User;
+use std::cmp::min;
+use std::collections::VecDeque;
 use tracing::info;
 use tracing::log::error;
 
@@ -29,8 +29,9 @@ where
             return Box::pin(async {}.into_actor(self));
         }
 
-        let (subscribers, msgs): (Vec<User>, Vec<T>) = self.msgs
-            .drain(..min(self.msgs.len(),2))
+        let (subscribers, msgs): (Vec<User>, Vec<T>) = self
+            .msgs
+            .drain(..min(self.msgs.len(), self.max_msg))
             .map(|it| (it.0, it.1))
             .unzip();
 
