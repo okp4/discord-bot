@@ -21,12 +21,14 @@ where
             error!("❌ Failed lock msgs queue, request fund couldn't be registered.");
             return
         };
-        if msgs.iter().find(|f| f.0.id == msg.subscriber.id) == None {
+        if !msgs.iter().any(|f| f.0.id == msg.subscriber.id) {
             info!("🤑 Register transaction for {}", msg.subscriber.name);
             msgs.push_back((msg.subscriber, msg.msg));
-        }
-        else {
-            info!("👮‍ The user {} already register transaction, skip this one.", msg.subscriber.name);
+        } else {
+            info!(
+                "👮‍ The user {} already register transaction, skip this one.",
+                msg.subscriber.name
+            );
         }
     }
 }
