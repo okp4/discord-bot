@@ -12,7 +12,6 @@ use crate::cosmos::tx::error::Error;
 use crate::cosmos::tx::messages::response::TxResult;
 use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
-use cosmrs::bip32::secp256k1::sha2::digest::typenum::UInt;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use serenity::model::user::User;
 use std::collections::VecDeque;

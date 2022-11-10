@@ -11,7 +11,6 @@ use actix::{Actor, ActorFutureExt, Handler, MailboxError, ResponseActFuture, Wra
 use cosmrs::tx::{Body, Msg};
 use serenity::model::user::User;
 use std::cmp::min;
-use std::collections::VecDeque;
 use tracing::info;
 use tracing::log::error;
 
