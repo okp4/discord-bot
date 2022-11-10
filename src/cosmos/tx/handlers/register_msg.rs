@@ -17,9 +17,10 @@ where
     type Result = RegisterMsgResult;
 
     fn handle(&mut self, msg: RegisterMsg<T>, _: &mut Self::Context) -> Self::Result {
-        if self.msgs.iter().find(|f| f.0.id == msg.subscriber.id) == None {
+        let mut msgs = self.msgs_queue.lock().unwrap();
+        if msgs.iter().find(|f| f.0.id == msg.subscriber.id) == None {
             info!("🤑 Register transaction for {}", msg.subscriber.name);
-            self.msgs.push_back((msg.subscriber, msg.msg));
+            msgs.push_back((msg.subscriber, msg.msg));
         }
         else {
             info!("👮‍ The user {} already register transaction, skip this one.", msg.subscriber.name);

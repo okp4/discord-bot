@@ -23,14 +23,16 @@ where
     type Result = ResponseActFuture<Self, TriggerTxResult>;
 
     fn handle(&mut self, msg: TriggerTx, _ctx: &mut Self::Context) -> Self::Result {
-        if self.msgs.is_empty() {
+        let mut msgs_queue = self.msgs_queue.lock().unwrap();
+        let msgs_queue_len = msgs_queue.len();
+
+        if msgs_queue.is_empty() {
             info!("🥹 No message to submit");
             return Box::pin(async {}.into_actor(self));
         }
 
-        let (subscribers, msgs): (Vec<User>, Vec<T>) = self
-            .msgs
-            .drain(..min(self.msgs.len(), self.max_msg))
+        let (subscribers, msgs): (Vec<User>, Vec<T>) = msgs_queue
+            .drain(..min(msgs_queue_len, self.max_msg))
             .map(|it| (it.0, it.1))
             .unzip();
 
