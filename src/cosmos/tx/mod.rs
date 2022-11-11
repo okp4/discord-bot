@@ -38,6 +38,8 @@ where
     pub batch_window: Duration,
     /// Number of max message per transactions
     pub max_msg: usize,
+    /// Number of message that can be in the queue
+    pub queue_limit: usize,
     /// Contains the batch of transaction message to sent as prost::Any.
     msgs_queue: Arc<Mutex<VecDeque<(User, T)>>>,
     /// GRPC client to send transaction.
@@ -69,6 +71,7 @@ where
             fee,
             batch_window: Duration::new(8, 0),
             max_msg: 7,
+            queue_limit: 1000,
             msgs_queue: Arc::new(Mutex::new(VecDeque::new())),
             grpc_client,
             response_handler: None,

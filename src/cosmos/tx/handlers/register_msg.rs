@@ -6,6 +6,7 @@ use crate::cosmos::tx::TxHandler;
 use actix::dev::ToEnvelope;
 use actix::{Actor, Handler};
 use cosmrs::tx::Msg;
+use tracing::log::warn;
 use tracing::{error, info};
 
 impl<T, R> Handler<RegisterMsg<T>> for TxHandler<T, R>
@@ -21,14 +22,19 @@ where
             error!("❌ Failed lock msgs queue, request fund couldn't be registered.");
             return
         };
-        if !msgs.iter().any(|f| f.0.id == msg.subscriber.id) {
-            info!("🤑 Register transaction for {}", msg.subscriber.name);
-            msgs.push_back((msg.subscriber, msg.msg));
-        } else {
+        if msgs.len() >= self.queue_limit {
+            warn!(
+                "❌ Could not register funds for {}, the queue is full.",
+                msg.subscriber.name
+            );
+        } else if msgs.iter().any(|f| f.0.id == msg.subscriber.id) {
             info!(
                 "👮‍ The user {} already register transaction, skip this one.",
                 msg.subscriber.name
             );
+        } else {
+            info!("🤑 Register transaction for {}", msg.subscriber.name);
+            msgs.push_back((msg.subscriber, msg.msg));
         }
     }
 }
