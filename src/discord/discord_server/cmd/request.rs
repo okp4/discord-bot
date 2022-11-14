@@ -43,7 +43,7 @@ impl CommandExecutable for RequestCmd {
                 Ok(_) => "📥 Funds has been successfully requested.".to_string(),
                 Err(err) => match err {
                     RequestError::QueueFull => "❌ Queue is full, please wait before re-submit funds request.".to_string(),
-                    RequestError::DuplicateUser => "❌ You have already request funds, please wait before re-submit your request.".to_string(),
+                    RequestError::DuplicateUser => "❌ You have already requested funds, please wait before re-submiting your request.".to_string(),
                     _ => "❌ An error occurs, please try again.".to_string(),
                 }
             }
