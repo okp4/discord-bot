@@ -1,11 +1,12 @@
 //! Register transaction message
 
+use crate::cosmos::tx::error::Error;
 use actix::Message;
 use cosmrs::tx::Msg;
 use serenity::model::user::User;
 
 /// Result of a RegisterMsg message.
-pub type RegisterMsgResult = ();
+pub type RegisterMsgResult = Result<(), Error>;
 
 /// Register transaction's message actor message.
 #[derive(Message)]
