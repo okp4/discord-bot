@@ -4,6 +4,8 @@ use tracing::{debug, info};
 
 use crate::cosmos::client::messages::validators_status::GetValidatorsStatus;
 use crate::cosmos::tx::error::Error;
+use crate::cosmos::validators::discord_message::ValidatorsMessage;
+use crate::cosmos::validators::discord_msg_util::compute_discord_message;
 use crate::cosmos::validators::messages::get_state_message::GetStateMessage;
 use crate::cosmos::validators::messages::update_state_message::UpdateStateMessage;
 use crate::cosmos::validators::Validators;
@@ -41,15 +43,14 @@ impl Handler<GetStateMessage> for Validators {
                         .map(|res: QueryValidatorsResponse| {
                             let validator_state = res.validators;
 
-                            for message in Validators::compute_discord_message(
-                                &validators_current_state,
-                                &validator_state,
-                            ) {
+                            for message in
+                                compute_discord_message(&validators_current_state, &validator_state)
+                            {
                                 discord_client.do_send(SendMessage {
-                                    description: message,
-                                    title: "Validator state".to_string(),
-                                    content: "".to_string(),
-                                    channel_id,
+                                    message: ValidatorsMessage {
+                                        description: message,
+                                        channel_id,
+                                    },
                                 });
                             }
                             self_address.do_send(UpdateStateMessage {

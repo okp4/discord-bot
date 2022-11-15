@@ -9,7 +9,6 @@ pub mod messages;
 use crate::cosmos::client::account::Account;
 use crate::cosmos::client::Client;
 use crate::cosmos::tx::error::Error;
-use crate::cosmos::validators::Validators;
 use crate::cosmos::tx::messages::response::TxResult;
 use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
