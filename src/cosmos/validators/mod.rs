@@ -112,3 +112,75 @@ impl Validators {
         messages
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_update_state_all_empty() {
+        let mut validators = Validators::new(123, None, None);
+        validators.update_state(vec![]);
+        assert_eq!(validators.validators_current, vec![]);
+    }
+
+    #[test]
+    fn test_update_state_empty() {
+        let mut validators = Validators::new(123, None, None);
+        let val1 = Validator {
+            status: 1,
+            tokens: "".to_string(),
+            delegator_shares: "".to_string(),
+            description: None,
+            unbonding_height: 0,
+            unbonding_time: None,
+            commission: None,
+            operator_address: "123456".to_string(),
+
+            consensus_pubkey: None,
+            jailed: false,
+            min_self_delegation: "".to_string(),
+        };
+        validators.update_state(vec![val1]);
+        assert_eq!(validators.validators_current.len(), 1);
+    }
+
+    #[test]
+    fn test_update_state_actual_update() {
+        let mut validators = Validators::new(123, None, None);
+        let val1 = Validator {
+            status: 1,
+            tokens: "".to_string(),
+            delegator_shares: "".to_string(),
+            description: None,
+            unbonding_height: 0,
+            unbonding_time: None,
+            commission: None,
+            operator_address: "123456".to_string(),
+
+            consensus_pubkey: None,
+            jailed: false,
+            min_self_delegation: "".to_string(),
+        };
+        validators.update_state(vec![val1]);
+        assert_eq!(validators.validators_current[0].status, 1);
+
+        let val2 = Validator {
+            status: 2,
+            tokens: "".to_string(),
+            delegator_shares: "".to_string(),
+            description: None,
+            unbonding_height: 0,
+            unbonding_time: None,
+            commission: None,
+            operator_address: "123456".to_string(),
+
+            consensus_pubkey: None,
+            jailed: false,
+            min_self_delegation: "".to_string(),
+        };
+        validators.update_state(vec![val2]);
+        assert_eq!(validators.validators_current.len(), 1);
+        assert_eq!(validators.validators_current[0].status, 2);
+    }
+}
