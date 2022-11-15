@@ -19,8 +19,8 @@ impl Handler<GetStateMessage> for Validators {
             msg.pagination_key
         );
 
-        let grpc_client = self.grpc_client.clone();
-        let discord_client = self.discord_client.clone();
+        let grpc_client = self.grpc_client.as_ref().unwrap().clone();
+        let discord_client = self.discord_client.as_ref().unwrap().clone();
         let channel_id = self.channel_id;
         let validators_current_state = self.validators_current.clone();
         let self_address = ctx.address();

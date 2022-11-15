@@ -18,9 +18,9 @@ pub struct Validators {
     /// Set the discord channel validator status should be sent.
     channel_id: u64,
     /// GRPC client to send transaction.
-    grpc_client: Addr<Client<Channel>>,
+    grpc_client: Option<Addr<Client<Channel>>>,
     /// Address of the Discord client Actor
-    discord_client: Addr<DiscordActor>,
+    discord_client: Option<Addr<DiscordActor>>,
     /// the actual state of all the validators
     validators_current: Vec<Validator>,
 }
@@ -45,8 +45,8 @@ impl Validators {
     /// Create a new validators actor client
     pub fn new(
         channel_id: u64,
-        grpc_client: Addr<Client<Channel>>,
-        discord_client: Addr<DiscordActor>,
+        grpc_client: Option<Addr<Client<Channel>>>,
+        discord_client: Option<Addr<DiscordActor>>,
     ) -> Self {
         Validators {
             channel_id,

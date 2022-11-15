@@ -78,8 +78,8 @@ impl Runnable for StartCmd {
 
             let _addr_validators = Validators::new(
                 config.validators.channel_id,
-                addr_cosmos_client.clone(),
-                addr_discord_client.clone(),
+                Option::from(addr_cosmos_client.clone()),
+                Option::from(addr_discord_client.clone()),
             )
             .start();
 
