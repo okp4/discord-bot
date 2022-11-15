@@ -55,3 +55,124 @@ pub fn compute_discord_message(
     }
     messages
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cosmos_sdk_proto::cosmos::staking::v1beta1::Description;
+
+    fn get_description() -> Option<Description> {
+        Option::from(Description {
+            moniker: "lemmings".to_string(),
+            identity: "".to_string(),
+            website: "".to_string(),
+            security_contact: "".to_string(),
+            details: "".to_string(),
+        })
+    }
+
+    fn get_active() -> Validator {
+        Validator {
+            status: 3,
+            tokens: "".to_string(),
+            delegator_shares: "".to_string(),
+            description: get_description(),
+            unbonding_height: 0,
+            unbonding_time: None,
+            commission: None,
+            operator_address: "123456".to_string(),
+
+            consensus_pubkey: None,
+            jailed: false,
+            min_self_delegation: "".to_string(),
+        }
+    }
+
+    fn get_inactive() -> Validator {
+        Validator {
+            status: 1,
+            tokens: "".to_string(),
+            delegator_shares: "".to_string(),
+            description: get_description(),
+            unbonding_height: 0,
+            unbonding_time: None,
+            commission: None,
+            operator_address: "123456".to_string(),
+
+            consensus_pubkey: None,
+            jailed: false,
+            min_self_delegation: "".to_string(),
+        }
+    }
+
+    #[test]
+    fn test_active() {
+        let val1 = get_inactive();
+        let val2 = get_active();
+
+        let old_validators = [val1];
+        let new_validators = [val2];
+
+        let messages = compute_discord_message(old_validators.as_ref(), new_validators.as_ref());
+
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0], "🥳 `lemmings` is active");
+    }
+
+    #[test]
+    fn test_inactive() {
+        let val1 = get_active();
+        let val2 = get_inactive();
+
+        let old_validators = [val1];
+        let new_validators = [val2];
+
+        let messages = compute_discord_message(old_validators.as_ref(), new_validators.as_ref());
+
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0], "😵 `lemmings` is inactive");
+    }
+
+    #[test]
+    fn test_nothing_hanged() {
+        let val1 = get_active();
+        let val2 = get_active();
+
+        let old_validators = [val1];
+        let new_validators = [val2];
+
+        let messages = compute_discord_message(old_validators.as_ref(), new_validators.as_ref());
+
+        assert_eq!(messages.len(), 0);
+    }
+
+    #[test]
+    fn test_jailed() {
+        let mut val1 = get_active();
+        val1.jailed = false;
+        let mut val2 = get_active();
+        val2.jailed = true;
+
+        let old_validators = [val1];
+        let new_validators = [val2];
+
+        let messages = compute_discord_message(old_validators.as_ref(), new_validators.as_ref());
+
+        assert_eq!(messages[0], "🚓 Jailed validator : `lemmings`");
+    }
+
+    #[test]
+    fn test_unjailed() {
+        let mut val1 = get_active();
+        val1.jailed = true;
+        let mut val2 = get_active();
+        val2.jailed = false;
+
+        let old_validators = [val1];
+        let new_validators = [val2];
+
+        let messages = compute_discord_message(old_validators.as_ref(), new_validators.as_ref());
+
+        assert_eq!(messages[0], "🏁 `lemmings` is out of jail\nWelcome back!");
+    }
+}
