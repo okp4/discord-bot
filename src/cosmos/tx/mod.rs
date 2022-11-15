@@ -14,6 +14,8 @@ use actix::{Actor, Addr, Handler};
 use cosmos_sdk_proto::cosmos::auth::v1beta1::BaseAccount;
 use cosmrs::tx::{Body, Fee, Msg, SignDoc, SignerInfo};
 use serenity::model::user::User;
+use std::collections::VecDeque;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tonic::transport::Channel;
 
@@ -34,10 +36,12 @@ where
     pub fee: Fee,
     /// Duration between two transactions.
     pub batch_window: Duration,
+    /// Number of max message per transactions
+    pub max_msg: usize,
+    /// Number of message that can be in the queue
+    pub queue_limit: usize,
     /// Contains the batch of transaction message to sent as prost::Any.
-    msgs: Vec<T>,
-    /// Contains the list of all user that request transaction.
-    subscribers: Vec<User>,
+    msgs_queue: Arc<Mutex<VecDeque<(User, T)>>>,
     /// GRPC client to send transaction.
     grpc_client: Addr<Client<Channel>>,
     /// Hold address of actor that will receive message when a transaction has been broadcasted.
@@ -66,8 +70,9 @@ where
             memo: "".to_string(),
             fee,
             batch_window: Duration::new(8, 0),
-            msgs: vec![],
-            subscribers: vec![],
+            max_msg: 7,
+            queue_limit: 1000,
+            msgs_queue: Arc::new(Mutex::new(VecDeque::new())),
             grpc_client,
             response_handler: None,
         };

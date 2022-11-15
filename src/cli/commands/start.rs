@@ -92,6 +92,8 @@ impl Runnable for StartCmd {
                 |handler| {
                     handler.memo = config.faucet.memo.to_string();
                     handler.batch_window = config.chain.batch_transaction_window;
+                    handler.max_msg = config.chain.max_msg;
+                    handler.queue_limit = config.chain.queue_limit;
                     handler
                 },
             )

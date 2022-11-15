@@ -102,6 +102,13 @@ pub struct ChainSection {
 
     /// Duration between two transaction batch.
     pub batch_transaction_window: Duration,
+
+    /// Configure the maximum number of message that are sent by transaction
+    /// batch.
+    pub max_msg: usize,
+
+    /// Maximum number of transaction waiting in the queue.
+    pub queue_limit: usize,
 }
 
 impl Default for ChainSection {
@@ -112,6 +119,8 @@ impl Default for ChainSection {
             denom: "know".to_string(),
             prefix: "okp4".to_string(),
             batch_transaction_window: Duration::from_secs(8),
+            max_msg: 7,
+            queue_limit: 1000,
         }
     }
 }

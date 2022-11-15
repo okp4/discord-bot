@@ -19,9 +19,21 @@ pub enum Error {
     #[error("An error occur at the grpc client: {0}")]
     Client(crate::cosmos::client::error::Error),
 
+    /// The transaction queue is full.
+    #[error("The transaction queue is full")]
+    QueueFull,
+
+    /// A transaction is already registered for this user
+    #[error("A transaction is already registered for this user")]
+    DuplicateUser,
+
     /// Failed communicate to actix.
     #[error("An error occurs when send message to actix: {0}.")]
     Mailbox(String),
+
+    /// Error occurs to lock mutex
+    #[error("Error occurs to lock mutex")]
+    Lock,
 }
 
 impl From<CosmosErrorReport> for Error {

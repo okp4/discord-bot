@@ -9,6 +9,8 @@ use crate::cosmos::tx::TxHandler;
 use actix::dev::ToEnvelope;
 use actix::{Actor, ActorFutureExt, Handler, MailboxError, ResponseActFuture, WrapFuture};
 use cosmrs::tx::{Body, Msg};
+use serenity::model::user::User;
+use std::cmp::min;
 use tracing::info;
 use tracing::log::error;
 
@@ -21,15 +23,21 @@ where
     type Result = ResponseActFuture<Self, TriggerTxResult>;
 
     fn handle(&mut self, msg: TriggerTx, _ctx: &mut Self::Context) -> Self::Result {
-        if self.msgs.is_empty() {
+        let Ok(mut msgs_queue) = self.msgs_queue.lock() else {
+            error!("❌ Failed lock msgs queue, request fund couldn't be registered.");
+            return Box::pin(async {}.into_actor(self));
+        };
+        let msgs_queue_len = msgs_queue.len();
+
+        if msgs_queue.is_empty() {
             info!("🥹 No message to submit");
             return Box::pin(async {}.into_actor(self));
         }
 
-        let msgs = self.msgs.clone();
-        let subscribers = self.subscribers.clone();
-        self.msgs.clear();
-        self.subscribers.clear();
+        let (subscribers, msgs): (Vec<User>, Vec<T>) = msgs_queue
+            .drain(..min(msgs_queue_len, self.max_msg))
+            .map(|it| (it.0, it.1))
+            .unzip();
 
         let grpc_client = self.grpc_client.clone();
         let sender_address = self.sender.address.to_string();

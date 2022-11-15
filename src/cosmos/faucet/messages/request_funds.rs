@@ -1,10 +1,11 @@
 //! Holds Request funds messages
+use crate::cosmos::tx::error::Error;
 use actix::Message;
 use cosmrs::AccountId;
 use serenity::model::user::User;
 
 /// Represent the RequestFunds message result
-pub type RequestFundsResult = ();
+pub type RequestFundsResult = Result<(), Error>;
 
 /// Request funds from the faucet message
 #[derive(Message)]

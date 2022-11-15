@@ -237,7 +237,7 @@ pub async fn start(
             info!("🛰 Connection to cosmos grpc endpoint successful");
             info!("🚀 Booting the Bot...");
 
-            Client::builder(&token, intents)
+            Client::builder(token, intents)
                 .event_handler(handler)
                 .await
                 .map_err(|_| Error::from(ErrorKind::Client("Failed to create client".to_string())))
