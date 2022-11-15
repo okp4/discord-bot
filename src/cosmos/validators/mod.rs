@@ -55,6 +55,22 @@ impl Validators {
             validators_current: vec![],
         }
     }
+    fn update_state(&mut self, validators: Vec<Validator>) {
+        validators.iter().for_each(|new_val| {
+            let val_pos = self
+                .validators_current
+                .iter()
+                .position(|v| (*v).operator_address.eq(&new_val.operator_address));
+            match val_pos {
+                None => {
+                    self.validators_current.append(&mut validators.clone());
+                }
+                Some(pos) => {
+                    self.validators_current[pos] = new_val.clone();
+                }
+            }
+        });
+    }
 
     fn compute_discord_message(
         current_validator_state: &[Validator],

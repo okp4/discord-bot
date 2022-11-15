@@ -9,20 +9,6 @@ impl Handler<UpdateStateMessage> for Validators {
     fn handle(&mut self, msg: UpdateStateMessage, _ctx: &mut Self::Context) -> Self::Result {
         debug!("Validators update state");
 
-        msg.validators.iter().for_each(|new_val| {
-            let val_pos = self
-                .validators_current
-                .iter()
-                .position(|v| (*v).eq(new_val));
-            match val_pos {
-                None => {
-                    self.validators_current.append(&mut msg.validators.clone());
-                }
-                Some(pos) => {
-                    let _ = std::mem::replace(&mut self.validators_current[pos], new_val.clone());
-                }
-            }
-            // info!("{:?}",self.validators_current);
-        });
+        self.update_state(msg.validators);
     }
 }
