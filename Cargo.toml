@@ -17,7 +17,7 @@ actix-rt = "2.2"
 bip39 = "1"
 clap = "3"
 cosmos-sdk-proto = "0.14.0"
-cosmrs = { version = "0.9.0" }
+cosmrs = { version = "0.10.0" }
 hyper = "0.14.23"
 metrics = { version = "^0.20" }
 metrics-exporter-prometheus = { version = "0.11.0", default-features = false, features = [
