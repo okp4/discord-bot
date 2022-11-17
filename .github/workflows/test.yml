@@ -41,6 +41,9 @@ jobs:
       - name: Install grcov
         run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
 
+      - name: Install llvm-tools
+        run: rustup component add llvm-tools-preview
+
       - name: Install cargo make
         uses: davidB/rust-cargo-make@v1
 
