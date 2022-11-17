@@ -84,7 +84,7 @@ impl Runnable for StartCmd {
                         denom: config.chain.denom.parse().unwrap(),
                         amount: config.faucet.fee_amount as u128,
                     }],
-                    gas_limit: config.faucet.gas_limit.into(),
+                    gas_limit: config.faucet.gas_limit,
                     payer: None,
                     granter: None,
                 },
