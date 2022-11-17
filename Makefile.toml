@@ -70,12 +70,11 @@ args = ["test", "--tests", "--workspace", "--locked", "--all-features"]
 command = "cargo"
 dependencies = ["build-coverage"]
 description = "Run all unit tests."
-env = { LLVM_PROFILE_FILE = "default.profraw", RUST_BACKTRACE = 1 }
-install_crate = { rustup_component_name = "llvm-tools-preview" }
+env = { LLVM_PROFILE_FILE = "default_%p.profraw", RUST_BACKTRACE = 1, RUSTFLAGS = "-Cinstrument-coverage" }
 
 [tasks.test-coverage]
 dependencies = ["test"]
-install_crate = { crate_name = "grcov" }
+install_crate = { crate_name = "grcov", rustup_component_name = "llvm-tools-preview", binary = "grcov", test_arg = "--help" }
 script = '''
 grcov . --binary-path ./target/debug/ -s . -t lcov --branch --ignore-not-existing --ignore "*cargo*" -o coverage.lcov
 '''
