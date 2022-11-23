@@ -12,6 +12,7 @@ use serenity::model::user::User;
 use serenity::prelude::Mentionable;
 use serenity::Error;
 use tracing::{error, info};
+use uritemplate::UriTemplate;
 
 /// The faucet response message when transaction successful
 #[derive(Clone, Debug)]
@@ -31,6 +32,7 @@ impl TransactionDiscordMessage for FaucetTransactionMessage {
         tx_response: Result<TxResponse, TxError>,
         subscribers: Vec<User>,
         channel_id: u64,
+        explorer_url: Option<String>,
     ) -> Self {
         match tx_response {
             Ok(tx_response) => {
@@ -38,13 +40,24 @@ impl TransactionDiscordMessage for FaucetTransactionMessage {
                     "✅ Transaction successfully broadcasted : {}",
                     tx_response.txhash
                 );
+                let tx_hash = if let Some(explorer_url) = explorer_url {
+                    format!(
+                        "[{}]({})",
+                        tx_response.txhash,
+                        UriTemplate::new(explorer_url.as_str())
+                            .set("txhash", tx_response.txhash.to_string())
+                            .build()
+                    )
+                } else {
+                    tx_response.txhash
+                };
                 Self {
                     title: String::from("🚀 Transaction broadcasted!"),
                     description: format!(
                         "\t- 🤝 Transaction hash: {}
                             \t- ⚙️ Result code : {}
                             \t- ⛽️ Gas used: {}",
-                        tx_response.txhash, tx_response.code, tx_response.gas_used
+                        tx_hash, tx_response.code, tx_response.gas_used
                     ),
                     content: {
                         let mut str = String::new();
