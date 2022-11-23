@@ -16,7 +16,7 @@ actix = "0.13"
 actix-rt = "2.2"
 bip39 = "1"
 clap = "3"
-cosmos-sdk-proto = "0.14.0"
+cosmos-sdk-proto = "0.15.0"
 cosmrs = { version = "0.10.0" }
 hyper = "0.14.23"
 metrics = { version = "^0.20" }
