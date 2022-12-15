@@ -72,6 +72,27 @@ OPTIONS:
  start -t MTIzNDU2Nzg5MDEyMzQ1Njc4OQ.Zm9vYmFy.Fa_SK4L9Sdk4Ndk4Sl5ZLkrjs4fk456DHKsqED -g 1234567890123456789
 ```
 
+#### Configuration
+
+The bot is configured using a `toml` configuration file. Here is an example that configures the chain and the faucet (to be adapted to your needs):
+
+```toml
+[chain]
+chain_id = "okp4-nemeton"
+denom = "uknow"
+grpc_address = "https://grpc.testnet.okp4.network"
+prefix = "okp4"
+batch_transaction_window = { secs = 15, nanos = 0 }
+
+[faucet]
+channel_id = 1034483599996620820
+amount_send = 1000000
+fee_amount = 0
+gas_limit = 200000
+memo = "Sent by økp4 discord bot 🤑"
+explorer_url = "https://explore.okp4.network/okp4%20testnet/tx/{txhash}"
+```
+
 #### Prometheus Metrics
 
 If you want to expose Prometheus metrics you need to set the `-p <PROMETHEUS_ENDPOINT>` to the command line:
