@@ -28,7 +28,7 @@ This bot is currently used for the [OKP4 Discord](https://discord.gg/okp4) serve
 
 - consultation of data spaces, including governance rules
 - consultation of the progress of a workflow execution
-- consultation of datset and service metadata
+- consultation of dataset and service metadata
 - ...
 
 ## 📄 How to use
