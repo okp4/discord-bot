@@ -13,10 +13,23 @@
 
 ## ✨ Purpose
 
-This project is a Discord bot mainly intended to be used for the [OKP4 Discord](https://discord.gg/okp4) server. It offers many features that help us keep the server running smoothly while providing many services to our community.
+This project is a general-purpose Discord bot around the [Cosmos ecosystem](https://cosmos.network) that bridges Discord and the blockchains of that ecosystem.
 
-The project also has a wider ambition to provide a general-purpose bot around the [Cosmos ecosystem](https://cosmos.network) that bridges Discord and the blockchains of that ecosystem.
-So stay tuned!
+The aim of the bot is to cover a wide range of features:
+
+- requesting tokens for a testnet Cosmos (aka as Faucet feature) ;
+- consultation of blockchain transactions ;
+- consultation of wallet balances ;
+- consultation of application states of modules or smart contracts ;
+- interaction with smart-contracts ;
+- ...
+
+This bot is currently used for the [OKP4 Discord](https://discord.gg/okp4) server, providing the many features that help us keep the server running smoothly while providing many services to our community. The aim is to provide the following range of features:
+
+- consultation of data spaces, including governance rules
+- consultation of the progress of a workflow execution
+- consultation of datset and service metadata
+- ...
 
 ## 📄 How to use
 
