@@ -78,7 +78,7 @@ The bot is configured using a `toml` configuration file. Here is an example that
 
 ```toml
 [chain]
-chain_id = "okp4-nemeton"
+chain_id = "okp4-nemeton-1"
 denom = "uknow"
 grpc_address = "https://grpc.testnet.okp4.network"
 prefix = "okp4"
