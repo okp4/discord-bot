@@ -13,10 +13,23 @@
 
 ## ✨ Purpose
 
-This project is a Discord bot mainly intended to be used for the [OKP4 Discord](https://discord.gg/okp4) server. It offers many features that help us keep the server running smoothly while providing many services to our community.
+This project is a general-purpose Discord bot around the [Cosmos ecosystem](https://cosmos.network) that bridges Discord and the blockchains of that ecosystem.
 
-The project also has a wider ambition to provide a general-purpose bot around the [Cosmos ecosystem](https://cosmos.network) that bridges Discord and the blockchains of that ecosystem.
-So stay tuned!
+The aim of the bot is to cover a wide range of features:
+
+- requesting tokens for a testnet Cosmos (aka as Faucet feature) ;
+- consultation of blockchain transactions ;
+- consultation of wallet balances ;
+- consultation of application states of modules or smart contracts ;
+- interaction with smart-contracts ;
+- ...
+
+This bot is currently used for the [OKP4 Discord](https://discord.gg/okp4) server, providing the many features that help us keep the server running smoothly while providing many services to our community. The aim is to provide the following range of features:
+
+- consultation of data spaces, including governance rules
+- consultation of the progress of a workflow execution
+- consultation of dataset and service metadata
+- ...
 
 ## 📄 How to use
 
@@ -57,6 +70,27 @@ OPTIONS:
 
 ```sh
  start -t MTIzNDU2Nzg5MDEyMzQ1Njc4OQ.Zm9vYmFy.Fa_SK4L9Sdk4Ndk4Sl5ZLkrjs4fk456DHKsqED -g 1234567890123456789
+```
+
+#### Configuration
+
+The bot is configured using a `toml` configuration file. Here is an example that configures the chain and the faucet (to be adapted to your needs):
+
+```toml
+[chain]
+chain_id = "okp4-nemeton-1"
+denom = "uknow"
+grpc_address = "https://grpc.testnet.okp4.network"
+prefix = "okp4"
+batch_transaction_window = { secs = 15, nanos = 0 }
+
+[faucet]
+channel_id = 1034483599996620820
+amount_send = 1000000
+fee_amount = 0
+gas_limit = 200000
+memo = "Sent by økp4 discord bot 🤑"
+explorer_url = "https://explore.okp4.network/okp4%20testnet/tx/{txhash}"
 ```
 
 #### Prometheus Metrics
