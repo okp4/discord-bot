@@ -4,7 +4,6 @@ mod start;
 
 use self::start::StartCmd;
 use abscissa_core::{config::Override, Command, Configurable, FrameworkError, Runnable};
-use clap::Parser;
 use std::path::PathBuf;
 
 use super::config::DiscordBotConfig;
@@ -13,25 +12,25 @@ use super::config::DiscordBotConfig;
 pub const CONFIG_FILE: &str = "discord_bot.toml";
 
 /// DiscordBot Subcommands
-#[derive(Command, Debug, Parser, Runnable)]
+#[derive(clap::Parser, Command, Debug, Runnable)]
 pub enum DiscordBotCmd {
     /// Boot the discord bot
     Start(StartCmd),
 }
 
 /// OKP4 discord bot application.
-#[derive(Command, Debug, Parser)]
-#[clap(author, about, version)]
+#[derive(clap::Parser, Command, Debug)]
+#[command(author, about, version)]
 pub struct EntryPoint {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     cmd: DiscordBotCmd,
 
     /// Enable verbose logging
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub verbose: bool,
 
     /// Use the specified config file
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub config: Option<String>,
 }
 

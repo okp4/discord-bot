@@ -4,7 +4,6 @@ use std::process;
 
 use abscissa_core::{config, Command, FrameworkError, FrameworkErrorKind, Runnable};
 use actix::Actor;
-use clap::Parser;
 use cosmrs::tx::Fee;
 use cosmrs::{bank::MsgSend, Coin};
 use tracing::{error, info};
@@ -24,37 +23,37 @@ use crate::{
     discord::discord_server,
 };
 
-#[derive(Command, Debug, Parser)]
-#[clap(arg_required_else_help(true))]
+#[derive(clap::Parser, Command, Debug)]
+#[command(arg_required_else_help(true))]
 pub struct StartCmd {
     /// The discord token
-    #[clap(short = 't', long = "token")]
+    #[arg(short = 't', long = "token")]
     token: Option<String>,
 
     /// The guild ID (Server ID)
-    #[clap(short = 'g', long = "guild-id")]
+    #[arg(short = 'g', long = "guild-id")]
     guild_id: Option<u64>,
 
     /// Configure the faucet mnemonic in order to send tokens from this address.
-    #[clap(short = 'm', long = "mnemonic")]
+    #[arg(short = 'm', long = "mnemonic")]
     mnemonic: Option<String>,
 
     /// The shard index ID to start.
     /// Establish a sharded connection and start listening for events.
     /// This will start receiving events and dispatch them to your registered handlers.
     /// This will create a single shard by ID. If using one shard per process, you will need to start other bot process with the other shard IDs.
-    #[clap(long)]
+    #[arg(long)]
     shard: Option<u64>,
 
     /// The total numbers of shards in the sharding connection.
-    #[clap(long)]
+    #[arg(long)]
     shards: Option<u64>,
 
     /// The prometheus endpoint.
     /// Optional. Configures an HTTP exporter that functions as a scrape endpoint for prometheus.
     /// The value is an IPv4 or IPv6 address and a port number, separated by a colon. For instance:
     /// 0.0.0.0:9000
-    #[clap(short = 'p', long = "prometheus-endpoint")]
+    #[arg(short = 'p', long = "prometheus-endpoint")]
     prometheus_endpoint: Option<SocketAddr>,
 }
 
