@@ -8,7 +8,7 @@ plugins:
     - preset: conventionalcommits
   - - "@semantic-release/changelog"
     - changelogFile: CHANGELOG.md
-      changelogTitle: "# ØKP4 template-rust"
+      changelogTitle: "# ØKP4 Discord bot"
   - - '@google/semantic-release-replace-plugin'
     - replacements:
         - files: [ Cargo.toml ]
