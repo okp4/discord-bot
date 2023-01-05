@@ -83,7 +83,7 @@ jobs:
 
       - name: Find change in readme file
         id: readme-change
-        uses: tj-actions/changed-files@v35.2.1
+        uses: tj-actions/changed-files@v35.3.0
         with:
           files: |
             README.md
