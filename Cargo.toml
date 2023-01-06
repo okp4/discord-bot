@@ -35,7 +35,7 @@ serenity = { version = "0.11", default-features = false, features = [
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
 thiserror = "=1.0.38"
-tokio = { version = "1.23", features = ["time", "macros", "tracing"] }
+tokio = { version = "1.24", features = ["time", "macros", "tracing"] }
 tonic = { version = "0.8.3", features = ["tls-webpki-roots"] }
 tracing = { version = "0.1.37", features = ["log"] }
 uritemplate = "0.1.2"
