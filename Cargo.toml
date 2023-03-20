@@ -13,7 +13,7 @@ version = "0.1.0"
 abscissa_core = { version = "0.7.0" }
 abscissa_tokio = { version = "0.7.0", features = ["actix"] }
 actix = "0.13"
-actix-rt = "2.2"
+actix-rt = "2.8"
 bip39 = "1"
 clap = { version = "4", features = ["derive"] }
 cosmos-sdk-proto = "0.14.0"
