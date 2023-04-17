@@ -48,6 +48,6 @@ abscissa_core = { version = "0.7.0", features = ["testing"] }
 once_cell = "1.17"
 
 [build-dependencies]
-prost-build = "0.11.8"
+prost-build = "0.11.9"
 prost-wkt-build = "0.4"
 tonic-build = "0.9.1"
