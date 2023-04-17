@@ -509,25 +509,14 @@ checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
 
 [[package]]
 name = "cosmos-sdk-proto"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20b42021d8488665b1a0d9748f1f81df7235362d194f44481e2e61bf376b77b4"
-dependencies = [
- "prost",
- "prost-types",
- "tendermint-proto 0.23.9",
- "tonic",
-]
-
-[[package]]
-name = "cosmos-sdk-proto"
 version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ade369159e0256ae10c6fb5f16decc37129d6b2416710456185daacfa65bdfae"
 dependencies = [
  "prost",
  "prost-types",
- "tendermint-proto 0.30.0",
+ "tendermint-proto",
+ "tonic",
 ]
 
 [[package]]
@@ -537,7 +526,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "466426988551efa4cce46bac51ce6b6e047ea7b76086ac5e47bffad90a3c093e"
 dependencies = [
  "bip32",
- "cosmos-sdk-proto 0.17.0",
+ "cosmos-sdk-proto",
  "ecdsa",
  "eyre",
  "getrandom",
@@ -719,7 +708,7 @@ dependencies = [
  "actix-rt",
  "bip39",
  "clap",
- "cosmos-sdk-proto 0.14.0",
+ "cosmos-sdk-proto",
  "cosmrs",
  "hyper",
  "metrics 0.20.1",
@@ -2572,27 +2561,9 @@ dependencies = [
  "signature",
  "subtle",
  "subtle-encoding",
- "tendermint-proto 0.30.0",
+ "tendermint-proto",
  "time 0.3.11",
  "zeroize",
-]
-
-[[package]]
-name = "tendermint-proto"
-version = "0.23.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68ce80bf536476db81ecc9ebab834dc329c9c1509a694f211a73858814bfe023"
-dependencies = [
- "bytes",
- "flex-error",
- "num-derive",
- "num-traits",
- "prost",
- "prost-types",
- "serde",
- "serde_bytes",
- "subtle-encoding",
- "time 0.3.11",
 ]
 
 [[package]]
