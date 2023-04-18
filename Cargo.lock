@@ -135,6 +135,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ahash"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
+dependencies = [
+ "cfg-if",
+ "once_cell",
+ "version_check",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -723,7 +734,7 @@ dependencies = [
  "cosmos-sdk-proto 0.14.0",
  "cosmrs",
  "hyper",
- "metrics 0.20.1",
+ "metrics 0.21.0",
  "metrics-exporter-prometheus",
  "metrics-process-promstyle",
  "once_cell",
@@ -1041,7 +1052,7 @@ version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
 ]
 
 [[package]]
@@ -1426,7 +1437,7 @@ version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e52eb6380b6d2a10eb3434aec0885374490f5b82c8aaf5cd487a183c98be834"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
  "metrics-macros 0.5.1",
 ]
 
@@ -1436,9 +1447,20 @@ version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b9b8653cec6897f73b519a43fba5ee3d50f62fe9af80b428accdcc093b4a849"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
  "metrics-macros 0.6.0",
- "portable-atomic",
+ "portable-atomic 0.3.18",
+]
+
+[[package]]
+name = "metrics"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa8ebbd1a9e57bbab77b9facae7f5136aea44c356943bf9a198f647da64285d6"
+dependencies = [
+ "ahash 0.8.3",
+ "metrics-macros 0.7.0",
+ "portable-atomic 1.2.0",
 ]
 
 [[package]]
@@ -1453,7 +1475,7 @@ dependencies = [
  "metrics 0.20.1",
  "metrics-util",
  "parking_lot",
- "portable-atomic",
+ "portable-atomic 0.3.18",
  "quanta",
  "thiserror",
  "tokio",
@@ -1482,6 +1504,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "metrics-macros"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ddece26afd34c31585c74a4db0630c376df271c285d682d1e55012197830b6df"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.12",
+]
+
+[[package]]
 name = "metrics-process-promstyle"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1503,7 +1536,7 @@ dependencies = [
  "metrics 0.20.1",
  "num_cpus",
  "parking_lot",
- "portable-atomic",
+ "portable-atomic 0.3.18",
  "quanta",
  "sketches-ddsketch",
 ]
@@ -1760,6 +1793,12 @@ name = "portable-atomic"
 version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81bdd679d533107e090c2704a35982fc06302e30898e63ffa26a81155c012e92"
+
+[[package]]
+name = "portable-atomic"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f602a0d1e09a48e4f8e8b4d4042e32807c3676da31f2ecabeac9f96226ec6c45"
 
 [[package]]
 name = "ppv-lite86"
