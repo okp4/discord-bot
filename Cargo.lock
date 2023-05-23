@@ -1922,9 +1922,9 @@ dependencies = [
 
 [[package]]
 name = "prost-wkt-build"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8958d27269aec14c99c134ebb2796ab4287478bde21453d76aa43d1683265759"
+checksum = "c4dca8bcead3b728a6a7da017cc95e7f4cb2320ec4f6896bc593a1c4700f7328"
 dependencies = [
  "heck",
  "prost",
