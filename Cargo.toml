@@ -18,7 +18,7 @@ bip39 = "1"
 clap = { version = "4", features = ["derive"] }
 cosmos-sdk-proto = "0.14.0"
 cosmrs = { version = "0.14.0" }
-hyper = "0.14.26"
+hyper = "0.14.27"
 metrics = { version = "^0.21" }
 metrics-exporter-prometheus = { version = "0.12.1", default-features = false, features = [
   "http-listener",
