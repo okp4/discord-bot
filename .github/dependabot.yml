@@ -5,7 +5,8 @@ updates:
     schedule:
       interval: "daily"
     reviewers:
-      - "maintainers"
+      - amimart
+      - ccamel
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
